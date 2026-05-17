@@ -1,30 +1,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Quiz Inicial</title>
+    <title>RPG da Floresta</title>
 </head>
-<body bgcolor="#0a0a18" text="#f5e6c8" link="#ffd700" vlink="#ffb347" alink="#ff4444">
-<center>
-  <table width="134" border="3" bordercolor="#ffd700" cellspacing="0" cellpadding="6" bgcolor="#111133">
-    <tr><td align="center" bgcolor="#0d0d28">
-      <font color="#ffd700" size="2" face="Arial"><b>🏆 QUIZ GERAL 🏆</b></font>
-    </td></tr>
-    <tr><td align="center" bgcolor="#0a0a20">
-      <font color="#f5e6c8" size="1" face="Arial">
-        <b>Regras:</b><br>
-        • 5 perguntas<br>
-        • 1 chance por vez<br>
-        • Errou? Game Over<br>
-        • Acertou todas? Vitória!
-      </font><br>
-      <font color="#ffaa00" size="1">📱 144x176px</font><br>
-      <a href="p1.html">
-        <font color="#00ff88" size="2"><b>▶ JOGAR</b></font>
-      </a>
-    </td></tr>
-  </table>
-  <br>
-  <font color="#444444" size="1">v1.0 HTML puro</font>
-</center>
+<body>
+    <h1>Floresta Sombria</h1>
+    <div id="story"></div>
+    <input type="text" id="input" placeholder="Digite aqui...">
+    <button onclick="processInput()">Enviar</button>
+
+    <script>
+        var stage = 0;
+        var gameOver = false;
+
+        var stages = [
+            {
+                message: "Você está na entrada da Floresta Negra. Digite 'entrar' para começar.",
+                expected: "entrar",
+                nextMessage: "Você entra na floresta. A trilha se divide. Digite 'luz' para seguir o caminho iluminado."
+            },
+            {
+                message: "A trilha se divide. Um caminho brilha com luz suave. Digite 'luz' para ir por ele.",
+                expected: "luz",
+                nextMessage: "Você segue a luz e encontra um lobo feroz! Digite 'lutar' para enfrentá-lo."
+            },
+            {
+                message: "Um lobo aparece! Digite 'lutar' para combatê-lo.",
+                expected: "lutar",
+                nextMessage: "Você derrota o lobo. Uma cabana surge à frente. Digite 'descansar' para entrar."
+            },
+            {
+                message: "Você está cansado. Digite 'descansar' para recuperar energias.",
+                expected: "descansar",
+                nextMessage: "Você descansa. Ao sair, vê a saída da floresta! Digite 'sair' para escapar."
+            },
+            {
+                message: "A saída está próxima! Digite 'sair' para completar a jornada.",
+                expected: "sair",
+                nextMessage: null
+            }
+        ];
+
+        function updateStory(message) {
+            document.getElementById('story').innerHTML = '<p>' + message + '</p>';
+        }
+
+        function processInput() {
+            if (gameOver) return;
+            var input = document.getElementById('input').value.trim().toLowerCase();
+            document.getElementById('input').value = '';
+
+            var currentStage = stages[stage];
+
+            if (input !== currentStage.expected) {
+                gameOver = true;
+                document.getElementById('story').innerHTML = '<p><b>Você morreu!</b> Sua jornada termina aqui. Recarregue a página para tentar novamente.</p>';
+                document.getElementById('input').disabled = true;
+                document.querySelector('button').disabled = true;
+                return;
+            }
+
+            if (stage === stages.length - 1) {
+                gameOver = true;
+                document.getElementById('story').innerHTML = '<p><b>Parabéns!</b> Você escapou da floresta com vida! Vitória!</p>';
+                document.getElementById('input').disabled = true;
+                document.querySelector('button').disabled = true;
+                return;
+            }
+
+            stage++;
+            updateStory(stages[stage].message);
+        }
+
+        updateStory(stages[0].message);
+    </script>
 </body>
 </html>
