@@ -5,173 +5,319 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Floresta Sombria - RPG</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0a0a0a;
+            --panel: #111;
+            --border: #3a3a3a;
+            --accent: #4a6;
+            --accent-dim: #2a4a3a;
+            --text: #c0c0c0;
+            --text-bright: #e0e0e0;
+            --danger: #e44;
+            --danger-glow: rgba(228, 68, 68, 0.4);
+            --gold: #aa8;
+            --gold-glow: rgba(170, 170, 136, 0.3);
+            --shadow-green: rgba(0, 120, 0, 0.25);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
         }
         body {
-            background: #0a0a0a;
-            color: #c0c0c0;
-            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
         #game-container {
-            background: #111;
-            border: 2px solid #3a3a3a;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 600px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            max-width: 640px;
             width: 100%;
-            box-shadow: 0 0 20px rgba(0, 120, 0, 0.2);
+            box-shadow: 0 0 30px var(--shadow-green), inset 0 0 60px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
         }
-        /* Menus */
-        .menu {
-            text-align: center;
+        /* Decorative scanline */
+        #game-container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.15) 2px,
+                rgba(0,0,0,0.15) 4px
+            );
+            pointer-events: none;
+            z-index: 10;
+            border-radius: inherit;
         }
-        .menu h1 {
+
+        /* Screen system with visibility for smooth fade */
+        .screen {
+            position: absolute;
+            inset: 28px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 6;
+        }
+
+        h1, h2 {
             color: #cfc;
-            margin-bottom: 30px;
-            font-size: 28px;
-            text-shadow: 0 0 8px #4a6;
+            margin-bottom: 24px;
+            text-shadow: 0 0 10px var(--accent), 0 0 20px rgba(74,170,102,0.3);
+            text-align: center;
+            letter-spacing: 2px;
         }
-        .menu button {
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.5rem; }
+
+        button, .btn {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin: 8px 0;
-            background: #222;
+            background: linear-gradient(180deg, #222, #1a1a1a);
             border: 1px solid #555;
-            color: #ccc;
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
+            color: var(--text-bright);
+            font-family: inherit;
+            font-size: 17px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.25s ease;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
         }
-        .menu button:hover {
-            background: #2a2a2a;
-            border-color: #4a6;
+        button::after, .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+        button:hover::after, .btn:hover::after { transform: translateX(100%); }
+        button:hover:not(:disabled), .btn:hover:not(:disabled) {
+            background: linear-gradient(180deg, #2a2a2a, #222);
+            border-color: var(--accent);
             color: #fff;
+            box-shadow: 0 0 12px rgba(74,170,102,0.2);
+            transform: translateY(-1px);
         }
-        .hidden {
-            display: none;
+        button:disabled, .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
         }
-        #dificuldade-botoes {
+        .btn-row {
             display: flex;
             gap: 10px;
+            width: 100%;
+        }
+        .btn-row button { flex: 1; }
+
+        /* Options specific */
+        #audio-status {
+            margin: 10px 0 6px;
+            font-size: 0.95rem;
+            color: #888;
+        }
+        #volume-control {
+            margin: 14px 0;
+            width: 100%;
+            text-align: center;
+        }
+        #volume-control label { display: block; margin-bottom: 6px; color: #888; font-size: 0.9rem; }
+        #volume-slider {
+            width: 80%;
+            accent-color: var(--accent);
+        }
+        #volume-value { display: inline-block; min-width: 36px; margin-left: 6px; color: var(--accent); }
+
+        /* Context screen */
+        #screen-contexto {
             justify-content: center;
+            text-align: center;
         }
-        #dificuldade-botoes button {
+        #contexto-texto {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #b8d4b8;
+            text-shadow: 0 0 8px rgba(74,170,102,0.2);
+            max-width: 90%;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+        }
+        #screen-contexto.active #contexto-texto {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Game screen */
+        #screen-jogo {
+            align-items: stretch;
+            justify-content: flex-start;
+        }
+        #story-wrap {
+            position: relative;
             flex: 1;
-        }
-        /* Área do jogo */
-        #jogo {
-            display: none;
+            min-height: 140px;
+            margin-bottom: 18px;
         }
         #story {
-            background: #1a1a1a;
-            padding: 15px;
-            border-left: 4px solid #4a6;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            background: linear-gradient(180deg, #1a1a1a, #151515);
+            padding: 18px;
+            border-left: 4px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            line-height: 1.65;
             min-height: 120px;
             white-space: pre-wrap;
             word-wrap: break-word;
+            font-size: 1.05rem;
+            color: #d0d0d0;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
             opacity: 0;
-            transition: opacity 0.5s ease-in;
+            transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
         #story.show {
             opacity: 1;
+            transform: translateY(0);
         }
+        #story.gameover-text {
+            color: #ff8888;
+            border-left-color: var(--danger);
+            text-shadow: 0 0 6px var(--danger-glow);
+            animation: glitch 0.3s ease-in-out infinite alternate;
+        }
+        #story.victory-text {
+            color: #cfc;
+            border-left-color: var(--accent);
+            text-shadow: 0 0 10px rgba(74,170,102,0.5), 0 0 20px rgba(74,170,102,0.2);
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-1px, 1px); }
+            40% { transform: translate(1px, -1px); }
+            60% { transform: translate(-1px, -1px); }
+            80% { transform: translate(1px, 1px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(74,170,102,0.2); }
+            50% { box-shadow: 0 0 25px rgba(74,170,102,0.45); }
+        }
+
         #input-area {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         #command {
             flex: 1;
-            padding: 10px;
-            background: #222;
+            padding: 12px;
+            background: #1e1e1e;
             border: 1px solid #444;
-            color: #ccc;
-            font-family: 'Courier New', monospace;
+            color: #eee;
+            font-family: inherit;
             font-size: 16px;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        #command:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(74,170,102,0.15);
         }
         #command:disabled {
-            opacity: 0.5;
-        }
-        button {
-            padding: 10px 15px;
-            background: #2a2a2a;
-            border: 1px solid #555;
-            color: #ccc;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        button:hover:not(:disabled) {
-            background: #3a3a3a;
-            border-color: #4a6;
-        }
-        button:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
+        #submit-btn {
+            width: auto;
+            padding: 12px 18px;
+        }
         #roll-btn {
-            background: #2a2a3a;
+            background: linear-gradient(180deg, #2a2a3a, #222233);
             border-color: #665;
             display: none;
+            margin-bottom: 10px;
         }
-        #roll-btn.visible {
-            display: inline-block;
-        }
+        #roll-btn.visible { display: block; }
         #roll-btn:hover:not(:disabled) {
-            background: #3a3a4a;
-            border-color: #aa8;
+            background: linear-gradient(180deg, #33334a, #2a2a3a);
+            border-color: var(--gold);
+            box-shadow: 0 0 12px var(--gold-glow);
         }
         #feedback {
             color: #e66;
             font-style: italic;
-            min-height: 20px;
-            margin-top: 10px;
+            min-height: 24px;
+            margin-top: 8px;
+            font-size: 0.95rem;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        .gameover-text {
-            color: #e44;
-            font-weight: bold;
-            text-shadow: 0 0 5px red;
-        }
-        .victory-text {
-            color: #4a6;
-            font-weight: bold;
-            text-shadow: 0 0 5px green;
-        }
+        #feedback.show { opacity: 1; }
         #restart-btn {
             display: none;
-            margin-top: 15px;
+            margin-top: 16px;
             width: 100%;
+            background: linear-gradient(180deg, #3a1a1a, #2a1111);
+            border-color: #855;
         }
-        /* Contexto animação */
-        #contexto {
-            text-align: center;
+        #restart-btn:hover {
+            border-color: var(--danger);
+            box-shadow: 0 0 12px var(--danger-glow);
         }
-        #contexto p {
-            opacity: 0;
-            transition: opacity 1s ease-in;
+
+        /* Cursor blink for typewriter feel */
+        .cursor::after {
+            content: "▋";
+            animation: blink 1s step-end infinite;
+            color: var(--accent);
+            margin-left: 2px;
         }
-        #contexto p.show {
-            opacity: 1;
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Responsive */
+        @media (max-width: 520px) {
+            #game-container { padding: 18px; }
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.2rem; }
+            .screen { inset: 18px; }
+            .btn-row { flex-direction: column; gap: 8px; }
+            #story { font-size: 0.95rem; padding: 14px; }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
         <!-- Menu Principal -->
-        <div id="menu-principal" class="menu">
+        <div id="screen-menu" class="screen active">
             <h1>🌲 Floresta Sombria</h1>
             <button id="btn-iniciar">Iniciar Jornada</button>
             <button id="btn-opcoes">Opções</button>
@@ -179,42 +325,49 @@
         </div>
 
         <!-- Menu Opções -->
-        <div id="menu-opcoes" class="menu hidden">
+        <div id="screen-opcoes" class="screen">
             <h2>Opções</h2>
-            <p id="audio-status">Áudio: Desligado</p>
-            <button id="btn-audio">Ligar Áudio</button>
+            <div id="audio-status">Áudio: Ligado</div>
+            <button id="btn-audio">Desligar Áudio</button>
+            <div id="volume-control">
+                <label for="volume-slider">Volume Mestre</label>
+                <input type="range" id="volume-slider" min="0" max="100" value="70">
+                <span id="volume-value">70%</span>
+            </div>
             <button id="btn-voltar-opcoes">Voltar</button>
         </div>
 
         <!-- Menu Sobre -->
-        <div id="menu-sobre" class="menu hidden">
+        <div id="screen-sobre" class="screen">
             <h2>Sobre</h2>
-            <p>Criado por <strong>Erik</strong> com a ajuda do <strong>Deepseek</strong></p>
-            <p>RPG de digitação com sistema de dados e múltiplos finais.</p>
+            <p style="text-align:center; margin-bottom:20px; line-height:1.6; color:#999;">
+                Criado por <strong style="color:#cfc;">Erik</strong> com a ajuda do <strong style="color:#cfc;">Deepseek</strong><br>
+                RPG de digitação com sistema de dados e múltiplos finais.
+            </p>
             <button id="btn-voltar-sobre">Voltar</button>
         </div>
 
-        <!-- Seleção de Dificuldade -->
-        <div id="menu-dificuldade" class="menu hidden">
-            <h2>Escolha a Dificuldade</h2>
-            <div id="dificuldade-botoes">
-                <button id="btn-tranquilo">🌿 Tranquilo</button>
-                <button id="btn-original">⚔️ Original</button>
-                <button id="btn-maldito">💀 Maldito</button>
+        <!-- Seleção de Personagem -->
+        <div id="screen-dificuldade" class="screen">
+            <h2>Escolha seu Caminho</h2>
+            <div class="btn-row">
+                <button id="btn-heroi">🛡️ Herói</button>
+                <button id="btn-cavaleiro">⚔️ Cavaleiro</button>
+                <button id="btn-aventureiro">🏹 Aventureiro</button>
             </div>
-            <button id="btn-voltar-dificuldade" style="margin-top:15px;">Voltar</button>
+            <button id="btn-voltar-dificuldade" style="margin-top:14px;">Voltar</button>
         </div>
 
-        <!-- Contexto (animação antes do jogo) -->
-        <div id="contexto" class="hidden">
+        <!-- Contexto -->
+        <div id="screen-contexto" class="screen">
             <p id="contexto-texto"></p>
         </div>
 
         <!-- Área do Jogo -->
-        <div id="jogo">
-            <div id="story"></div>
+        <div id="screen-jogo" class="screen">
+            <div id="story-wrap"><div id="story"></div></div>
             <div id="input-area">
-                <input type="text" id="command" placeholder="Digite seu comando..." autofocus>
+                <input type="text" id="command" placeholder="Digite seu comando..." autocomplete="off" spellcheck="false" autofocus>
                 <button id="submit-btn">Enviar</button>
             </div>
             <button id="roll-btn" title="Rolar um D20">🎲 Rolar D20</button>
@@ -224,348 +377,698 @@
     </div>
 
     <script>
-        (function() {
-            // ========== CENAS DO JOGO ==========
-            const scenes = {
-                entrada: {
-                    text: "Você está na entrada da Floresta Sombria. Árvores retorcidas bloqueiam a luz. O vento sussurra avisos.\n\nDigite 'entrar' para adentrar a floresta.",
-                    options: { entrar: "trilha" },
-                    allowRoll: false,
-                    risk: 0
-                },
-                trilha: {
-                    text: "A trilha se divide. Luz de vaga-lumes à esquerda, escuridão à direita.\n\nDigite 'luz' para seguir a luz ou 'escuro' para as sombras.",
-                    options: { luz: "lobo", escuro: "cogumelos" },
-                    allowRoll: false,
-                    risk: 0
-                },
-                lobo: {
-                    text: "Um lobo cinzento bloqueia o caminho! Ele rosna ferozmente.\n\nDigite 'lutar' para enfrentá-lo ou 'fugir' para correr.",
-                    options: { lutar: "cabana", fugir: "gameover_lobo" },
-                    allowRoll: false,
-                    risk: 0.1 // 10% de falha inesperada no original, maior no maldito
-                },
-                cogumelos: {
-                    text: "Cogumelos brilhantes exalam aroma adocicado.\n\nDigite 'comer' para experimentar ou 'ignorar' para seguir.",
-                    options: { comer: "gameover_cogumelo", ignorar: "ponte" },
-                    allowRoll: false,
-                    risk: 0.2
-                },
-                cabana: {
-                    text: "Uma cabana antiga com luz bruxuleante. Porta entreaberta.\n\nDigite 'entrar' para investigar ou 'passar' para ignorar.",
-                    options: { entrar: "interior_cabana", passar: "ponte" },
-                    allowRoll: false,
-                    risk: 0.05
-                },
-                interior_cabana: {
-                    text: "Um velho sábio joga dados sobre a mesa.\n'Teste sua sorte, aventureiro. Digite 'rolar' para lançar os dados!'",
-                    options: {}, // apenas rolar
-                    allowRoll: true,
-                    rollMinSuccess: 12,
-                    rollSuccessScene: "sabio_ajuda",
-                    rollFailScene: "sabio_trapaca",
-                    risk: 0
-                },
-                sabio_ajuda: {
-                    text: "", // preenchido dinamicamente
-                    options: { beber: "ponte_segura" },
-                    allowRoll: false,
-                    risk: 0,
-                    dynamicText: function(result) {
-                        return `Você tirou ${result} no dado! O sábio lhe entrega uma poção azul.\n"Beba, isso lhe dará forças."\n\nDigite 'beber' para tomar a poção.`;
-                    }
-                },
-                sabio_trapaca: {
-                    text: "",
-                    options: { seguir: "gameover_trapaca" },
-                    allowRoll: false,
-                    risk: 0,
-                    dynamicText: function(result) {
-                        return `Você tirou ${result}. O sábio ri e desaparece. Névoa densa o envolve.\nDigite 'seguir' para tentar sair.`;
-                    }
-                },
-                ponte: {
-                    text: "Ponte de corda sobre abismo. Tábuas apodrecidas balançam.\n\nDigite 'atravessar' para cruzar ou 'desistir' para voltar.",
-                    options: { atravessar: "saida", desistir: "gameover_ponte" },
-                    allowRoll: false,
-                    risk: 0.3
-                },
-                ponte_segura: {
-                    text: "Graças à poção, você se sente confiante. A ponte parece firme.\n\nDigite 'atravessar' para cruzar.",
-                    options: { atravessar: "saida" },
-                    allowRoll: false,
-                    risk: 0
-                },
-                saida: {
-                    text: "A saída da floresta! A luz do sol brilha através das árvores.\n\nDigite 'sair' para escapar.",
-                    options: { sair: "vitoria" },
-                    allowRoll: false,
-                    risk: 0.1
-                },
-                vitoria: {
-                    text: "✨ Você escapou da Floresta Sombria! ✨\nO reino está salvo. Você é um herói!",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isEnding: true
-                },
-                gameover_lobo: {
-                    text: "O lobo é mais rápido. Ele o derruba e...\n💀 Você morreu. 💀",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isGameOver: true
-                },
-                gameover_cogumelo: {
-                    text: "Veneno mortal corre em suas veias.\n💀 Você morreu. 💀",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isGameOver: true
-                },
-                gameover_trapaca: {
-                    text: "Você cambaleia na névoa e cai num poço.\n💀 Você morreu. 💀",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isGameOver: true
-                },
-                gameover_ponte: {
-                    text: "Uma rajada de vento te derruba no abismo.\n💀 Você morreu. 💀",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isGameOver: true
-                },
-                gameover_generico: {
-                    text: "Ação inválida! A floresta pune os indecisos. Você cai num buraco escuro.\n💀 Você morreu. 💀",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isGameOver: true
-                },
-                gameover_azar: {
-                    text: "O destino foi cruel. Uma armadilha oculta se ativa.\n💀 Você morreu. 💀",
-                    options: {},
-                    allowRoll: false,
-                    risk: 0,
-                    isGameOver: true
+    (function() {
+        "use strict";
+
+        // ===================== AUDIO ENGINE (Web Audio API) =====================
+        // Procedural audio: no external files needed. Respects browser autoplay policy.
+        const AudioEngine = {
+            ctx: null,
+            masterGain: null,
+            enabled: true,
+            volume: 0.7,
+            currentTrack: null,
+            nextTrackTimeout: null,
+            analyser: null,
+
+            init() {
+                if (this.ctx) return;
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                this.ctx = new AC();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = this.volume;
+                this.masterGain.connect(this.ctx.destination);
+                this.analyser = this.ctx.createAnalyser();
+                this.analyser.fftSize = 64;
+                this.masterGain.connect(this.analyser);
+            },
+
+            ensure() {
+                if (!this.ctx) this.init();
+                if (this.ctx && this.ctx.state === "suspended") {
+                    this.ctx.resume();
                 }
-            };
+            },
 
-            // Estado do jogo
-            let currentSceneId = "entrada";
-            let gameActive = false;
-            let difficulty = "original"; // padrão
-            let audioEnabled = false;
-
-            // Elementos DOM
-            const menuPrincipal = document.getElementById("menu-principal");
-            const menuOpcoes = document.getElementById("menu-opcoes");
-            const menuSobre = document.getElementById("menu-sobre");
-            const menuDificuldade = document.getElementById("menu-dificuldade");
-            const contextoDiv = document.getElementById("contexto");
-            const contextoTexto = document.getElementById("contexto-texto");
-            const jogoDiv = document.getElementById("jogo");
-            const storyEl = document.getElementById("story");
-            const commandInput = document.getElementById("command");
-            const submitBtn = document.getElementById("submit-btn");
-            const rollBtn = document.getElementById("roll-btn");
-            const feedbackEl = document.getElementById("feedback");
-            const restartBtn = document.getElementById("restart-btn");
-            const audioStatus = document.getElementById("audio-status");
-            const btnAudio = document.getElementById("btn-audio");
-
-            // ========== FUNÇÕES DE INTERFACE ==========
-            function showScreen(screenId) {
-                [menuPrincipal, menuOpcoes, menuSobre, menuDificuldade, contextoDiv, jogoDiv].forEach(el => el.classList.add("hidden"));
-                document.getElementById(screenId).classList.remove("hidden");
-            }
-
-            // ========== ÁUDIO (placeholder) ==========
-            function toggleAudio() {
-                audioEnabled = !audioEnabled;
-                audioStatus.textContent = "Áudio: " + (audioEnabled ? "Ligado" : "Desligado");
-                btnAudio.textContent = audioEnabled ? "Desligar Áudio" : "Ligar Áudio";
-                // Futuro: inicializar/parar música de fundo
-            }
-
-            // ========== INICIAR JOGO COM DIFICULDADE ==========
-            function startGame(dif) {
-                difficulty = dif;
-                showScreen("contexto");
-                contextoTexto.textContent = "Você é um aventureiro que precisa atravessar a temida Floresta Sombria para salvar o reino. Cada passo pode ser o último...";
-                contextoTexto.classList.add("show");
-                // Após 3 segundos, inicia o jogo com fade-in
-                setTimeout(() => {
-                    showScreen("jogo");
-                    jogoDiv.style.display = "block";
-                    storyEl.classList.add("show");
-                    gameActive = true;
-                    transitionTo("entrada");
-                }, 3000);
-            }
-
-            // ========== MECÂNICA DE CENAS ==========
-            function normalize(str) {
-                return str.trim().toLowerCase();
-            }
-
-            function displayScene(sceneId, extraData = null) {
-                const scene = scenes[sceneId];
-                let text = scene.text;
-                if (scene.dynamicText && extraData !== null) {
-                    text = scene.dynamicText(extraData);
+            setVolume(v) {
+                this.volume = v;
+                if (this.masterGain) {
+                    // Smooth ramp to avoid clicks
+                    const now = this.ctx.currentTime;
+                    this.masterGain.gain.setTargetAtTime(v, now, 0.05);
                 }
-                storyEl.innerHTML = text.replace(/\n/g, "<br>");
-                storyEl.classList.remove("gameover-text", "victory-text");
-                if (scene.isGameOver) storyEl.classList.add("gameover-text");
-                if (sceneId === "vitoria") storyEl.classList.add("victory-text");
-                feedbackEl.textContent = "";
+            },
 
-                // Controle do botão de rolar dados
-                if (scene.allowRoll && gameActive) {
-                    rollBtn.classList.add("visible");
+            stopCurrent() {
+                if (this.currentTrack) {
+                    const t = this.currentTrack;
+                    const now = this.ctx ? this.ctx.currentTime : 0;
+                    try {
+                        t.gain.gain.setTargetAtTime(0.0001, now, 0.15);
+                        setTimeout(() => { try { t.stop(); t.cleanup(); } catch(e){} }, 400);
+                    } catch(e) {}
+                    this.currentTrack = null;
+                }
+                if (this.nextTrackTimeout) {
+                    clearTimeout(this.nextTrackTimeout);
+                    this.nextTrackTimeout = null;
+                }
+            },
+
+            playMenu() {
+                if (!this.enabled) return;
+                this.ensure();
+                this.stopCurrent();
+                // Gentle ambient pad: two low sines with slow beating
+                const t = this._createTrack();
+                const o1 = this.ctx.createOscillator();
+                const o2 = this.ctx.createOscillator();
+                const g1 = this.ctx.createGain();
+                const g2 = this.ctx.createGain();
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.value = 600;
+                filter.Q.value = 0.5;
+
+                o1.type = "sine"; o1.frequency.value = 110; // A2
+                o2.type = "sine"; o2.frequency.value = 112; // slight detune for beating
+                g1.gain.value = 0.25;
+                g2.gain.value = 0.25;
+
+                // LFO for slow volume swell
+                const lfo = this.ctx.createOscillator();
+                lfo.type = "sine"; lfo.frequency.value = 0.15;
+                const lfoGain = this.ctx.createGain(); lfoGain.gain.value = 0.15;
+                lfo.connect(lfoGain); lfoGain.connect(g1.gain); lfoGain.connect(g2.gain);
+                lfo.start();
+
+                o1.connect(g1); g1.connect(filter);
+                o2.connect(g2); g2.connect(filter);
+                filter.connect(t.gain);
+                t.gain.connect(this.masterGain);
+
+                o1.start(); o2.start();
+                t.oscillators.push(o1, o2, lfo);
+                t.gains.push(g1, g2, lfoGain);
+                t.nodes.push(filter);
+
+                t.gain.gain.setTargetAtTime(1, this.ctx.currentTime, 0.4);
+                this.currentTrack = t;
+            },
+
+            playGame() {
+                if (!this.enabled) return;
+                this.ensure();
+                this.stopCurrent();
+                const t = this._createTrack();
+                // Tense drone: triangle wave filtered low, with occasional noise burst
+                const o = this.ctx.createOscillator();
+                o.type = "triangle";
+                o.frequency.value = 65; // C2-ish
+                const g = this.ctx.createGain();
+                g.gain.value = 0.35;
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.value = 320;
+                filter.Q.value = 2;
+
+                // Slow filter sweep LFO
+                const lfo = this.ctx.createOscillator();
+                lfo.type = "sine"; lfo.frequency.value = 0.08;
+                const lfoGain = this.ctx.createGain(); lfoGain.gain.value = 120;
+                lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
+                lfo.start();
+
+                o.connect(g); g.connect(filter); filter.connect(t.gain);
+                t.gain.connect(this.masterGain);
+                o.start();
+                t.oscillators.push(o, lfo);
+                t.gains.push(g, lfoGain);
+                t.nodes.push(filter);
+                t.gain.gain.setTargetAtTime(1, this.ctx.currentTime, 0.6);
+                this.currentTrack = t;
+            },
+
+            playGameOver() {
+                if (!this.enabled) return;
+                this.ensure();
+                this.stopCurrent();
+                const t = this._createTrack();
+                // Dissonant low cluster
+                const freqs = [55, 58, 61];
+                freqs.forEach(f => {
+                    const o = this.ctx.createOscillator();
+                    o.type = "sawtooth"; o.frequency.value = f;
+                    const g = this.ctx.createGain(); g.gain.value = 0.12;
+                    const f2 = this.ctx.createBiquadFilter();
+                    f2.type = "lowpass"; f2.frequency.value = 240;
+                    o.connect(g); g.connect(f2); f2.connect(t.gain);
+                    o.start();
+                    t.oscillators.push(o);
+                    t.gains.push(g);
+                    t.nodes.push(f2);
+                });
+                t.gain.connect(this.masterGain);
+                t.gain.gain.setTargetAtTime(1, this.ctx.currentTime, 0.3);
+                this.currentTrack = t;
+            },
+
+            playVictory() {
+                if (!this.enabled) return;
+                this.ensure();
+                this.stopCurrent();
+                const t = this._createTrack();
+                // Major arpeggio using 3 sines
+                const now = this.ctx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C major ish
+                notes.forEach((freq, i) => {
+                    const o = this.ctx.createOscillator();
+                    o.type = "sine"; o.frequency.value = freq;
+                    const g = this.ctx.createGain();
+                    g.gain.setValueAtTime(0, now);
+                    g.gain.linearRampToValueAtTime(0.12, now + 0.3 + i * 0.25);
+                    g.gain.exponentialRampToValueAtTime(0.0001, now + 3.5 + i * 0.3);
+                    o.connect(g); g.connect(t.gain);
+                    o.start(now + i * 0.25);
+                    o.stop(now + 4.5 + i * 0.3);
+                    t.oscillators.push(o);
+                    t.gains.push(g);
+                });
+                t.gain.connect(this.masterGain);
+                t.gain.gain.setTargetAtTime(1, now, 0.3);
+                this.currentTrack = t;
+                // Auto stop track reference after done
+                this.nextTrackTimeout = setTimeout(() => { this.currentTrack = null; }, 6000);
+            },
+
+            sfxDice() {
+                if (!this.enabled || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const o = this.ctx.createOscillator();
+                o.type = "square";
+                o.frequency.setValueAtTime(800, now);
+                o.frequency.exponentialRampToValueAtTime(120, now + 0.25);
+                const g = this.ctx.createGain();
+                g.gain.setValueAtTime(0.15, now);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = "highpass"; filter.frequency.value = 400;
+                o.connect(filter); filter.connect(g); g.connect(this.masterGain);
+                o.start(now); o.stop(now + 0.3);
+            },
+
+            sfxType() {
+                if (!this.enabled || !this.ctx) return;
+                // Very subtle click
+                const now = this.ctx.currentTime;
+                const o = this.ctx.createOscillator();
+                o.type = "triangle";
+                o.frequency.setValueAtTime(1200, now);
+                const g = this.ctx.createGain();
+                g.gain.setValueAtTime(0.02, now);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+                o.connect(g); g.connect(this.masterGain);
+                o.start(now); o.stop(now + 0.04);
+            },
+
+            _createTrack() {
+                const g = this.ctx.createGain();
+                g.gain.value = 0;
+                return { gain: g, oscillators: [], gains: [], nodes: [], stop() {
+                    this.oscillators.forEach(o => { try { o.stop(); } catch(e){} });
+                }, cleanup() {
+                    this.oscillators.forEach(o => { try { o.disconnect(); } catch(e){} });
+                    this.gains.forEach(gn => { try { gn.disconnect(); } catch(e){} });
+                    this.nodes.forEach(n => { try { n.disconnect(); } catch(e){} });
+                    try { this.gain.disconnect(); } catch(e){}
+                }};
+            }
+        };
+
+        // ===================== DATA =====================
+        const baseScenes = {
+            trilha: {
+                text: `A trilha se divide. Luz de vaga-lumes à esquerda, escuridão à direita.
+
+Digite 'luz' para seguir a luz ou 'escuro' para as sombras.`,
+                options: { luz: "lobo", escuro: "cogumelos" }, allowRoll: false, risk: 0
+            },
+            lobo: {
+                text: `Um lobo cinzento bloqueia o caminho! Ele rosna ferozmente.
+
+Digite 'lutar' para enfrentá-lo ou 'fugir' para correr.`,
+                options: { lutar: "cabana", fugir: "gameover_lobo" }, allowRoll: false, risk: 0.1
+            },
+            cogumelos: {
+                text: `Cogumelos brilhantes exalam aroma adocicado.
+
+Digite 'comer' para experimentar ou 'ignorar' para seguir.`,
+                options: { comer: "gameover_cogumelo", ignorar: "ponte" }, allowRoll: false, risk: 0.2
+            },
+            cabana: {
+                text: `Uma cabana antiga com luz bruxuleante. Porta entreaberta.
+
+Digite 'entrar' para investigar ou 'passar' para ignorar.`,
+                options: { entrar: "interior_cabana", passar: "ponte" }, allowRoll: false, risk: 0.05
+            },
+            interior_cabana: {
+                text: `Um velho sábio joga dados sobre a mesa.
+'Teste sua sorte, aventureiro.'
+
+Digite 'rolar' para lançar os dados!`,
+                options: {}, allowRoll: true, rollMinSuccess: 12, rollSuccessScene: "sabio_ajuda", rollFailScene: "sabio_trapaca", risk: 0
+            },
+            sabio_ajuda: {
+                text: "", options: { beber: "ponte_segura" }, allowRoll: false, risk: 0,
+                dynamicText(result) {
+                    return `Você tirou ${result} no dado! O sábio lhe entrega uma poção azul.
+"Beba, isso lhe dará forças."
+
+Digite 'beber' para tomar a poção.`;
+                }
+            },
+            sabio_trapaca: {
+                text: "", options: { seguir: "gameover_trapaca" }, allowRoll: false, risk: 0,
+                dynamicText(result) {
+                    return `Você tirou ${result}. O sábio ri e desaparece. Névoa densa o envolve.
+Digite 'seguir' para tentar sair.`;
+                }
+            },
+            ponte: {
+                text: `Ponte de corda sobre abismo. Tábuas apodrecidas balançam.
+
+Digite 'atravessar' para cruzar ou 'desistir' para voltar.`,
+                options: { atravessar: "saida", desistir: "gameover_ponte" }, allowRoll: false, risk: 0.3
+            },
+            ponte_segura: {
+                text: `Graças à poção, você se sente confiante. A ponte parece firme.
+
+Digite 'atravessar' para cruzar.`,
+                options: { atravessar: "saida" }, allowRoll: false, risk: 0
+            },
+            saida: {
+                text: `A saída da floresta! A luz do sol brilha através das árvores.
+
+Digite 'sair' para escapar.`,
+                options: { sair: "vitoria" }, allowRoll: false, risk: 0.1
+            },
+            vitoria: {
+                text: `✨ Você escapou da Floresta Sombria! ✨
+O reino está salvo. Você é um herói!`,
+                options: {}, allowRoll: false, risk: 0, isEnding: true
+            },
+            gameover_lobo: {
+                text: `O lobo é mais rápido. Ele o derruba e...
+💀 Você morreu. 💀`,
+                options: {}, allowRoll: false, risk: 0, isGameOver: true
+            },
+            gameover_cogumelo: {
+                text: `Veneno mortal corre em suas veias.
+💀 Você morreu. 💀`,
+                options: {}, allowRoll: false, risk: 0, isGameOver: true
+            },
+            gameover_trapaca: {
+                text: `Você cambaleia na névoa e cai num poço.
+💀 Você morreu. 💀`,
+                options: {}, allowRoll: false, risk: 0, isGameOver: true
+            },
+            gameover_ponte: {
+                text: `Uma rajada de vento te derruba no abismo.
+💀 Você morreu. 💀`,
+                options: {}, allowRoll: false, risk: 0, isGameOver: true
+            },
+            gameover_generico: {
+                text: `Ação inválida! A floresta pune os indecisos. Você cai num buraco escuro.
+💀 Você morreu. 💀`,
+                options: {}, allowRoll: false, risk: 0, isGameOver: true
+            },
+            gameover_azar: {
+                text: `O destino foi cruel. Uma armadilha oculta se ativa.
+💀 Você morreu. 💀`,
+                options: {}, allowRoll: false, risk: 0, isGameOver: true
+            }
+        };
+
+        // ===================== STATE =====================
+        let scenes = {};
+        let currentSceneId = "";
+        let gameActive = false;
+        let difficulty = "heroi";
+        let typewriterTimer = null;
+
+        // ===================== DOM =====================
+        const screens = {
+            menu: document.getElementById("screen-menu"),
+            opcoes: document.getElementById("screen-opcoes"),
+            sobre: document.getElementById("screen-sobre"),
+            dificuldade: document.getElementById("screen-dificuldade"),
+            contexto: document.getElementById("screen-contexto"),
+            jogo: document.getElementById("screen-jogo")
+        };
+        const storyEl = document.getElementById("story");
+        const commandInput = document.getElementById("command");
+        const submitBtn = document.getElementById("submit-btn");
+        const rollBtn = document.getElementById("roll-btn");
+        const feedbackEl = document.getElementById("feedback");
+        const restartBtn = document.getElementById("restart-btn");
+        const audioStatus = document.getElementById("audio-status");
+        const btnAudio = document.getElementById("btn-audio");
+        const volumeSlider = document.getElementById("volume-slider");
+        const volumeValue = document.getElementById("volume-value");
+        const contextoTexto = document.getElementById("contexto-texto");
+
+        // ===================== UTILS =====================
+        function normalize(str) { return str.trim().toLowerCase(); }
+
+        function setFeedback(text, type="error") {
+            feedbackEl.textContent = text;
+            feedbackEl.style.color = type === "success" ? "#8e8" : (type === "info" ? "#aa8" : "#e66");
+            feedbackEl.classList.add("show");
+            clearTimeout(setFeedback._t);
+            setFeedback._t = setTimeout(() => feedbackEl.classList.remove("show"), 2500);
+        }
+
+        // Typewriter effect with cursor
+        function typeText(element, text, speed = 18, onDone = null) {
+            element.classList.remove("show");
+            element.innerHTML = "";
+            clearTimeout(typewriterTimer);
+            let i = 0;
+            const clean = text.replace(/\n/g, "<br>");
+            // We insert HTML progressively. For simplicity with <br>, we split by tags.
+            const parts = clean.split(/(<br>)/g);
+            let partIndex = 0;
+            let charIndex = 0;
+            let currentHTML = "";
+            element.classList.add("cursor");
+
+            function step() {
+                if (partIndex >= parts.length) {
+                    element.classList.remove("cursor");
+                    if (onDone) onDone();
+                    return;
+                }
+                const part = parts[partIndex];
+                if (part === "<br>") {
+                    currentHTML += "<br>";
+                    element.innerHTML = currentHTML;
+                    partIndex++;
+                    charIndex = 0;
+                    typewriterTimer = setTimeout(step, speed * 2);
                 } else {
-                    rollBtn.classList.remove("visible");
-                }
-            }
-
-            function transitionTo(sceneId, extraData = null) {
-                if (!gameActive && sceneId !== "entrada") return;
-                const scene = scenes[sceneId];
-                displayScene(sceneId, extraData);
-                currentSceneId = sceneId;
-
-                if (scene.isEnding || scene.isGameOver) {
-                    gameActive = false;
-                    commandInput.disabled = true;
-                    submitBtn.disabled = true;
-                    rollBtn.disabled = true;
-                    restartBtn.style.display = "block";
-                } else {
-                    commandInput.disabled = false;
-                    submitBtn.disabled = false;
-                    rollBtn.disabled = false;
-                    restartBtn.style.display = "none";
-                    commandInput.focus();
-                }
-            }
-
-            // ========== SISTEMA DE RISCO POR DIFICULDADE ==========
-            function applyRisk(scene) {
-                if (!scene.risk || scene.risk <= 0) return null;
-                let chance = scene.risk;
-                if (difficulty === "original") {
-                    // mantém chance base
-                } else if (difficulty === "maldito") {
-                    chance *= 2.5; // muito mais perigoso
-                } else { // tranquilo
-                    chance = 0; // sem risco
-                }
-                if (chance > 0 && Math.random() < chance) {
-                    return "gameover_azar"; // morte por azar
-                }
-                return null;
-            }
-
-            function processInput() {
-                if (!gameActive) return;
-                const raw = commandInput.value;
-                const input = normalize(raw);
-                commandInput.value = "";
-                feedbackEl.textContent = "";
-
-                const scene = scenes[currentSceneId];
-
-                // Comando especial "rolar" (apenas se permitido)
-                if (input === "rolar") {
-                    if (scene.allowRoll) {
-                        rollDice();
+                    if (charIndex < part.length) {
+                        currentHTML += part[charIndex];
+                        element.innerHTML = currentHTML;
+                        charIndex++;
+                        if (charIndex % 3 === 0) AudioEngine.sfxType();
+                        typewriterTimer = setTimeout(step, speed + Math.random() * 10);
                     } else {
-                        feedbackEl.textContent = "⚠️ Não há nada para rolar aqui.";
+                        partIndex++;
+                        charIndex = 0;
+                        typewriterTimer = setTimeout(step, speed);
                     }
-                    return;
                 }
-
-                // Verifica se comando é válido
-                if (!scene.options || !scene.options.hasOwnProperty(input)) {
-                    transitionTo("gameover_generico");
-                    return;
-                }
-
-                // Risco de falha inesperada baseado na dificuldade
-                const riskResult = applyRisk(scene);
-                if (riskResult) {
-                    transitionTo(riskResult);
-                    return;
-                }
-
-                // Transição normal
-                const nextId = scene.options[input];
-                transitionTo(nextId);
             }
+            // Small delay to allow CSS transition to prepare
+            setTimeout(() => {
+                element.classList.add("show");
+                step();
+            }, 60);
+        }
 
-            function rollDice() {
-                if (!gameActive) return;
-                const scene = scenes[currentSceneId];
-                if (!scene.allowRoll) {
-                    feedbackEl.textContent = "⚠️ Você não pode rolar dados agora.";
-                    return;
-                }
-
-                const roll = Math.floor(Math.random() * 20) + 1;
-                const success = roll >= scene.rollMinSuccess;
-                const nextScene = success ? scene.rollSuccessScene : scene.rollFailScene;
-                feedbackEl.textContent = `🎲 Você rolou ${roll}. ${success ? "Sucesso!" : "Fracasso..."}`;
-                transitionTo(nextScene, roll);
-            }
-
-            function restartGame() {
-                gameActive = false;
-                commandInput.disabled = true;
-                submitBtn.disabled = true;
-                rollBtn.disabled = true;
-                restartBtn.style.display = "none";
-                storyEl.classList.remove("show");
-                // Volta ao menu de dificuldade
-                showScreen("menu-dificuldade");
-                jogoDiv.style.display = "none";
-            }
-
-            // ========== EVENT LISTENERS ==========
-            // Menus
-            document.getElementById("btn-iniciar").addEventListener("click", () => showScreen("menu-dificuldade"));
-            document.getElementById("btn-opcoes").addEventListener("click", () => showScreen("menu-opcoes"));
-            document.getElementById("btn-sobre").addEventListener("click", () => showScreen("menu-sobre"));
-            document.getElementById("btn-voltar-opcoes").addEventListener("click", () => showScreen("menu-principal"));
-            document.getElementById("btn-voltar-sobre").addEventListener("click", () => showScreen("menu-principal"));
-            document.getElementById("btn-voltar-dificuldade").addEventListener("click", () => showScreen("menu-principal"));
-
-            // Dificuldade
-            document.getElementById("btn-tranquilo").addEventListener("click", () => startGame("tranquilo"));
-            document.getElementById("btn-original").addEventListener("click", () => startGame("original"));
-            document.getElementById("btn-maldito").addEventListener("click", () => startGame("maldito"));
-
-            // Áudio
-            btnAudio.addEventListener("click", toggleAudio);
-
-            // Jogo
-            submitBtn.addEventListener("click", processInput);
-            rollBtn.addEventListener("click", rollDice);
-            restartBtn.addEventListener("click", restartGame);
-            commandInput.addEventListener("keydown", function(e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    processInput();
-                }
+        // ===================== SCREEN MANAGER =====================
+        function showScreen(name) {
+            // Fade out current
+            Object.values(screens).forEach(s => s.classList.remove("active"));
+            // Small delay to allow fade-out, then fade in target
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    screens[name].classList.add("active");
+                });
             });
 
-            // Inicialização
-            showScreen("menu-principal");
-            audioStatus.textContent = "Áudio: Desligado";
-            btnAudio.textContent = "Ligar Áudio";
-        })();
+            // Audio context must resume on user gesture; ensure here
+            AudioEngine.ensure();
+
+            if (name === "jogo") {
+                // game music handled by startGame flow
+            } else if (name === "menu" || name === "opcoes" || name === "sobre" || name === "dificuldade") {
+                AudioEngine.playMenu();
+            }
+        }
+
+        // ===================== GAME LOGIC =====================
+        function buildScenes(dif) {
+            scenes = JSON.parse(JSON.stringify(baseScenes)); // deep clone
+            // dynamicText functions are lost in JSON; restore references
+            scenes.sabio_ajuda.dynamicText = baseScenes.sabio_ajuda.dynamicText;
+            scenes.sabio_trapaca.dynamicText = baseScenes.sabio_trapaca.dynamicText;
+
+            const texts = {
+                heroi: {
+                    contexto: `Você é o Herói Lendário, campeão do reino. A Floresta Sombria é apenas mais um desafio em sua jornada épica. Com coragem inabalável, você parte para mais uma vitória.`,
+                    entrada: `Como herói aclamado, você marcha para a entrada da floresta. Árvores retorcidas bloqueiam a luz. O vento sussurra avisos, mas sua determinação é inabalável.
+
+Digite 'entrar' para adentrar a floresta.`
+                },
+                cavaleiro: {
+                    contexto: `Você é Sir Cedric, um nobre cavaleiro em busca de glória. A Floresta Sombria esconde perigos, mas sua espada e honra o guiarão.`,
+                    entrada: `Com armadura reluzente, você avança para a entrada da floresta. As árvores parecem sussurrar segredos antigos.
+
+Digite 'entrar' para adentrar a floresta.`
+                },
+                aventureiro: {
+                    contexto: `Você é um aventureiro destemido, movido pela curiosidade e pela promessa de tesouros ocultos. A Floresta Sombria é traiçoeira, mas você confia em seus instintos.`,
+                    entrada: `Você está na entrada da Floresta Sombria. Árvores retorcidas bloqueiam a luz do sol. O vento sussurra avisos.
+
+Digite 'entrar' para adentrar a floresta.`
+                }
+            };
+            const t = texts[dif];
+            scenes.entrada = {
+                text: t.entrada,
+                options: { entrar: "trilha" },
+                allowRoll: false, risk: 0
+            };
+            return t.contexto;
+        }
+
+        function startGame(dif) {
+            difficulty = dif;
+            const contextStory = buildScenes(dif);
+            contextoTexto.textContent = contextStory;
+            showScreen("contexto");
+
+            // After 4.5s, fade to game
+            setTimeout(() => {
+                showScreen("jogo");
+                gameActive = true;
+                enableInputs(true);
+                restartBtn.style.display = "none";
+                storyEl.classList.remove("gameover-text", "victory-text");
+                AudioEngine.playGame();
+                transitionTo("entrada");
+            }, 4500);
+        }
+
+        function transitionTo(sceneId, extraData = null) {
+            if (!gameActive && sceneId !== "entrada") return;
+            const scene = scenes[sceneId];
+            if (!scene) return;
+
+            let text = scene.text;
+            if (scene.dynamicText && extraData !== null) {
+                text = scene.dynamicText(extraData);
+            }
+
+            currentSceneId = sceneId;
+            rollBtn.classList.toggle("visible", !!(scene.allowRoll && gameActive));
+
+            // Ending handling
+            if (scene.isEnding || scene.isGameOver) {
+                gameActive = false;
+                enableInputs(false);
+                restartBtn.style.display = "block";
+                if (scene.isGameOver) {
+                    storyEl.classList.add("gameover-text");
+                    AudioEngine.playGameOver();
+                } else if (sceneId === "vitoria") {
+                    storyEl.classList.add("victory-text");
+                    AudioEngine.playVictory();
+                }
+                // Instant display for endings (no typewriter) for dramatic impact
+                storyEl.classList.remove("cursor");
+                storyEl.innerHTML = text.replace(/\n/g, "<br>");
+                storyEl.classList.add("show");
+            } else {
+                enableInputs(true);
+                restartBtn.style.display = "none";
+                storyEl.classList.remove("gameover-text", "victory-text");
+                typeText(storyEl, text, 16, () => {
+                    commandInput.focus();
+                });
+            }
+        }
+
+        function enableInputs(on) {
+            commandInput.disabled = !on;
+            submitBtn.disabled = !on;
+            rollBtn.disabled = !on;
+            if (on) setTimeout(() => commandInput.focus(), 50);
+        }
+
+        function applyRisk(scene) {
+            if (!scene.risk || scene.risk <= 0) return null;
+            let chance = scene.risk;
+            if (difficulty === "cavaleiro") {
+                // padrão
+            } else if (difficulty === "aventureiro") {
+                chance *= 2.5;
+            } else {
+                chance = 0;
+            }
+            if (chance > 0 && Math.random() < chance) {
+                return "gameover_azar";
+            }
+            return null;
+        }
+
+        function processInput() {
+            if (!gameActive) return;
+            const raw = commandInput.value;
+            const input = normalize(raw);
+            commandInput.value = "";
+            if (!input) return;
+
+            const scene = scenes[currentSceneId];
+            if (input === "rolar") {
+                if (scene.allowRoll) {
+                    rollDice();
+                } else {
+                    setFeedback("⚠️ Não há nada para rolar aqui.", "info");
+                }
+                return;
+            }
+
+            if (!scene.options || !scene.options.hasOwnProperty(input)) {
+                transitionTo("gameover_generico");
+                return;
+            }
+
+            const riskResult = applyRisk(scene);
+            if (riskResult) {
+                transitionTo(riskResult);
+                return;
+            }
+
+            transitionTo(scene.options[input]);
+        }
+
+        function rollDice() {
+            if (!gameActive) return;
+            const scene = scenes[currentSceneId];
+            if (!scene.allowRoll) {
+                setFeedback("⚠️ Você não pode rolar dados agora.", "info");
+                return;
+            }
+            AudioEngine.sfxDice();
+            const roll = Math.floor(Math.random() * 20) + 1;
+            const success = roll >= scene.rollMinSuccess;
+            const nextScene = success ? scene.rollSuccessScene : scene.rollFailScene;
+            setFeedback(`🎲 Você rolou ${roll}. ${success ? "Sucesso!" : "Fracasso..."}`, success ? "success" : "error");
+            transitionTo(nextScene, roll);
+        }
+
+        function restartGame() {
+            gameActive = false;
+            clearTimeout(typewriterTimer);
+            enableInputs(false);
+            restartBtn.style.display = "none";
+            storyEl.classList.remove("show", "gameover-text", "victory-text");
+            storyEl.innerHTML = "";
+            showScreen("dificuldade");
+            AudioEngine.playMenu();
+        }
+
+        // ===================== EVENTS =====================
+        document.getElementById("btn-iniciar").addEventListener("click", () => showScreen("dificuldade"));
+        document.getElementById("btn-opcoes").addEventListener("click", () => showScreen("opcoes"));
+        document.getElementById("btn-sobre").addEventListener("click", () => showScreen("sobre"));
+        document.getElementById("btn-voltar-opcoes").addEventListener("click", () => showScreen("menu"));
+        document.getElementById("btn-voltar-sobre").addEventListener("click", () => showScreen("menu"));
+        document.getElementById("btn-voltar-dificuldade").addEventListener("click", () => showScreen("menu"));
+
+        document.getElementById("btn-heroi").addEventListener("click", () => startGame("heroi"));
+        document.getElementById("btn-cavaleiro").addEventListener("click", () => startGame("cavaleiro"));
+        document.getElementById("btn-aventureiro").addEventListener("click", () => startGame("aventureiro"));
+
+        btnAudio.addEventListener("click", () => {
+            AudioEngine.enabled = !AudioEngine.enabled;
+            audioStatus.textContent = "Áudio: " + (AudioEngine.enabled ? "Ligado" : "Desligado");
+            btnAudio.textContent = AudioEngine.enabled ? "Desligar Áudio" : "Ligar Áudio";
+            if (AudioEngine.enabled) {
+                AudioEngine.ensure();
+                // Determine which screen is active to pick correct music
+                if (screens.jogo.classList.contains("active") && gameActive) AudioEngine.playGame();
+                else if (screens.contexto.classList.contains("active")) AudioEngine.playMenu();
+                else AudioEngine.playMenu();
+            } else {
+                AudioEngine.stopCurrent();
+            }
+        });
+
+        volumeSlider.addEventListener("input", function() {
+            const v = parseInt(this.value, 10);
+            volumeValue.textContent = v + "%";
+            AudioEngine.setVolume(v / 100);
+        });
+
+        submitBtn.addEventListener("click", processInput);
+        rollBtn.addEventListener("click", rollDice);
+        restartBtn.addEventListener("click", restartGame);
+        commandInput.addEventListener("keydown", e => {
+            if (e.key === "Enter") { e.preventDefault(); processInput(); }
+        });
+
+        // Prevent focus loss when clicking inside game container
+        document.getElementById("game-container").addEventListener("click", e => {
+            if (gameActive && e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+                commandInput.focus();
+            }
+        });
+
+        // ===================== INIT =====================
+        // Load saved volume if any
+        try {
+            const savedVol = localStorage.getItem("fs_volume");
+            if (savedVol !== null) {
+                const v = parseInt(savedVol, 10);
+                volumeSlider.value = v;
+                volumeValue.textContent = v + "%";
+                AudioEngine.setVolume(v / 100);
+            }
+            const savedAudio = localStorage.getItem("fs_audio");
+            if (savedAudio !== null) {
+                AudioEngine.enabled = savedAudio === "1";
+                audioStatus.textContent = "Áudio: " + (AudioEngine.enabled ? "Ligado" : "Desligado");
+                btnAudio.textContent = AudioEngine.enabled ? "Desligar Áudio" : "Ligar Áudio";
+            }
+        } catch(e) {}
+
+        // Save preferences on change
+        function savePrefs() {
+            try {
+                localStorage.setItem("fs_volume", volumeSlider.value);
+                localStorage.setItem("fs_audio", AudioEngine.enabled ? "1" : "0");
+            } catch(e) {}
+        }
+        volumeSlider.addEventListener("change", savePrefs);
+        btnAudio.addEventListener("click", savePrefs);
+
+        // Start
+        showScreen("menu");
+    })();
     </script>
 </body>
 </html>
