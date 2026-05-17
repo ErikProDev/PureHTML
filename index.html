@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Floresta Sombria — RPG</title>
+    <title>🌿 Floresta Sombria — RPG</title>
 
     <!-- Fontes externas estilo cartoon/fantasia -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -230,12 +230,11 @@
             box-shadow:inset 0 0 20px rgba(212,160,23,0.3), 0 6px 0 #6b4c1e;
         }
 
-        /*  NOVO DESTAQUE SIMPLES: apenas cor e negrito, sem fundo */
+        /* 🟢 DESTAQUE SIMPLES: cor verde e negrito */
         #story strong, #story b {
-            color: #2e8b2e;   /* verde Zelda */
+            color: #2e8b2e;
             font-weight: 900;
         }
-        /* Nos finais de game over, mantemos a cor vermelha definida inline */
 
         #input-row{display:flex;gap:8px;margin-bottom:8px}
         #cmd{
@@ -258,7 +257,7 @@
         #feedback.err{color:#c0392b} #feedback.ok{color:#2e8b2e} #feedback.info{color:#b8860b}
 
         .cursor::after{
-            content:""; animation:blink 1s step-end infinite;
+            content:"▋"; animation:blink 1s step-end infinite;
             color:#2e8b2e; margin-left:2px;
         }
         @keyframes blink{50%{opacity:0}}
@@ -280,46 +279,46 @@
     <div id="game">
         <!-- MENU -->
         <div id="sc-menu" class="screen on">
-            <h1>Lendas na Floresta</h1>
+            <h1>🌿 A Lenda da Floresta</h1>
             <div class="sep"></div>
-            <button id="b-start"> Iniciar Jornada</button>
-            <button id="b-opts"> Opções</button>
-            <button id="b-about"> Sobre</button>
+            <button id="b-start">🗡️ Iniciar Jornada</button>
+            <button id="b-opts">⚙️ Opções</button>
+            <button id="b-about">📜 Sobre</button>
         </div>
         <!-- OPTIONS -->
         <div id="sc-opts" class="screen">
-            <h2> Opções</h2>
+            <h2>⚙️ Opções</h2>
             <div class="sep"></div>
-            <div id="audio-label"> Áudio: Ligado</div>
-            <button id="b-audio"> Desligar Áudio</button>
+            <div id="audio-label">🎵 Áudio: Ligado</div>
+            <button id="b-audio">🔇 Desligar Áudio</button>
             <div id="vol-wrap">
-                <div class="opt-label"> Volume</div>
+                <div class="opt-label">🔊 Volume</div>
                 <input type="range" id="vol-slider" min="0" max="100" value="70">
                 <span id="vol-val">70%</span>
             </div>
-            <button id="b-back-opts"> Voltar</button>
+            <button id="b-back-opts">↩️ Voltar</button>
         </div>
         <!-- ABOUT -->
         <div id="sc-about" class="screen">
-            <h2> Pergaminho do Criador</h2>
+            <h2>📜 Pergaminho do Criador</h2>
             <div class="sep"></div>
             <p style="text-align:center;line-height:1.8;color:#3a2510;max-width:400px;margin-bottom:22px;font-size:1.1rem;font-weight:700;">
                 Forjado por <strong style="color:#2e8b2e;">Erik</strong> com a sabedoria do
                 <strong style="color:#d4a017;">Deepseek</strong><br>
-                 RPG de digitação com dados e finais épicos 
+                ✦ RPG de digitação com dados e finais épicos ✦
             </p>
-            <button id="b-back-about"> Voltar</button>
+            <button id="b-back-about">↩️ Voltar</button>
         </div>
         <!-- DIFFICULTY -->
         <div id="sc-diff" class="screen">
-            <h2> Escolha seu Destino</h2>
+            <h2>🗺️ Escolha seu Destino</h2>
             <div class="sep"></div>
             <div class="row">
-                <button id="b-hero"> Herói</button>
-                <button id="b-knight"> Cavaleiro</button>
-                <button id="b-ranger"> Aventureiro</button>
+                <button id="b-hero">🛡️ Herói</button>
+                <button id="b-knight">⚔️ Cavaleiro</button>
+                <button id="b-ranger">🏹 Aventureiro</button>
             </div>
-            <button id="b-back-diff" style="margin-top:14px;"> Voltar</button>
+            <button id="b-back-diff" style="margin-top:14px;">↩️ Voltar</button>
         </div>
         <!-- CONTEXT -->
         <div id="sc-ctx" class="screen">
@@ -329,27 +328,27 @@
         <div id="sc-game" class="screen">
             <div id="story-box"><div id="story"></div></div>
             <div id="input-row">
-                <input type="text" id="cmd" placeholder=" Digite seu comando..." autocomplete="off" spellcheck="false">
-                <button id="send-btn"></button>
+                <input type="text" id="cmd" placeholder="⚔️ Digite seu comando..." autocomplete="off" spellcheck="false">
+                <button id="send-btn">▶</button>
             </div>
-            <button id="dice-btn" title="Rolar D20"> Rolar D20</button>
+            <button id="dice-btn" title="Rolar D20">🎲 Rolar D20</button>
             <div id="feedback"></div>
-            <button id="restart-btn"> Reiniciar Jornada</button>
+            <button id="restart-btn">💀 Reiniciar Jornada</button>
         </div>
     </div>
 
     <!-- ========== SEUS ARQUIVOS DE ÁUDIO ========== -->
     <audio id="audio-menu" loop preload="auto">
-        <source src="menu.mp3" type="audio/mpeg">
+        <source src="musica_menu.mp3" type="audio/mpeg">
     </audio>
     <audio id="audio-game" loop preload="auto">
-        <source src="jogo.mp3" type="audio/mpeg">
+        <source src="musica_jogo.mp3" type="audio/mpeg">
     </audio>
     <audio id="audio-gameover" loop preload="auto">
-        <source src="gameover.mp3" type="audio/mpeg">
+        <source src="musica_gameover.mp3" type="audio/mpeg">
     </audio>
     <audio id="audio-vitoria" loop preload="auto">
-        <source src="win.mp3" type="audio/mpeg">
+        <source src="musica_vitoria.mp3" type="audio/mpeg">
     </audio>
     <audio id="sfx-dice" preload="auto">
         <source src="dado.mp3" type="audio/mpeg">
@@ -437,40 +436,40 @@
             trilha:{text:`A trilha se divide. Luz de vaga-lumes à <em>esquerda</em>, escuridão à <em>direita</em>.
 
 Digite <strong>"luz"</strong> para seguir a luz ou <strong>"escuro"</strong> para as sombras.`,opts:{luz:"lobo",escuro:"cogumelos"},roll:false,risk:0},
-            lobo:{text:`Um <strong>lobo cinzento</strong> bloqueia o caminho! Ele rosna ferozmente, olhos brilhando na penumbra.
+            lobo:{text:`Um <strong>lobo cinzento 🐺</strong> bloqueia o caminho! Ele rosna ferozmente, olhos brilhando na penumbra.
 
 Digite <strong>"lutar"</strong> para enfrentá-lo ou <strong>"fugir"</strong> para correr.`,opts:{lutar:"cabana",fugir:"gameover_lobo"},roll:false,risk:0.1},
-            cogumelos:{text:`<strong>Cogumelos brilhantes</strong> exalam um aroma adocicado quase hipnótico. Suas cores parecem pulsar lentamente.
+            cogumelos:{text:`<strong>Cogumelos brilhantes 🍄</strong> exalam um aroma adocicado quase hipnótico. Suas cores parecem pulsar lentamente.
 
 Digite <strong>"comer"</strong> para experimentar ou <strong>"ignorar"</strong> para seguir.`,opts:{comer:"gameover_cogumelo",ignorar:"ponte"},roll:false,risk:0.2},
-            cabana:{text:`Uma <strong>cabana antiga</strong> com luz bruxuleante. A porta está entreaberta, rangendo ao vento.
+            cabana:{text:`Uma <strong>cabana antiga 🏚️</strong> com luz bruxuleante. A porta está entreaberta, rangendo ao vento.
 
 Digite <strong>"entrar"</strong> para investigar ou <strong>"passar"</strong> para ignorar.`,opts:{entrar:"interior_cabana",passar:"ponte"},roll:false,risk:0.05},
-            interior_cabana:{text:`Um <strong>velho sábio</strong> joga dados sobre uma mesa de carvalho rachada.
+            interior_cabana:{text:`Um <strong>velho sábio 🧙‍♂️</strong> joga dados sobre uma mesa de carvalho rachada.
 
 — Teste sua sorte, aventureiro. — murmura ele, sem olhar para você.
 
 Digite <strong>"rolar"</strong> para lançar os dados!`,opts:{},roll:true,need:12,ok:"sabio_ajuda",fail:"sabio_trapaca",risk:0},
             sabio_ajuda:{text:"",opts:{beber:"ponte_segura"},roll:false,risk:0,
-                fmt:function(r){return `Você tirou <strong>${r}</strong> no dado! O sábio sorri e lhe entrega uma <strong>poção azul</strong>.<br><br>— Beba. Isso lhe dará forças para a travessia.<br><br>Digite <strong>"beber"</strong> para tomar a poção.`;}},
+                fmt:function(r){return `Você tirou <strong>${r}</strong> no dado! O sábio sorri e lhe entrega uma <strong>poção azul 🧪</strong>.<br><br>— Beba. Isso lhe dará forças para a travessia.<br><br>Digite <strong>"beber"</strong> para tomar a poção.`;}},
             sabio_trapaca:{text:"",opts:{seguir:"gameover_trapaca"},roll:false,risk:0,
-                fmt:function(r){return `Você tirou <strong>${r}</strong>. O sábio ri — uma risada seca, desprovida de alegria — e <em>desaparece</em>. Névoa densa o envolve, sufocando a luz.<br><br>Digite <strong>"seguir"</strong> para tentar sair.`;}},
-            ponte:{text:`Uma <strong>ponte de corda</strong> estende-se sobre um abismo sem fim. Tábuas apodrecidas balançam ao vento cortante.
+                fmt:function(r){return `Você tirou <strong>${r}</strong>. O sábio ri — uma risada seca, desprovida de alegria — e <em>desaparece</em> 👻. Névoa densa o envolve, sufocando a luz.<br><br>Digite <strong>"seguir"</strong> para tentar sair.`;}},
+            ponte:{text:`Uma <strong>ponte de corda 🌉</strong> estende-se sobre um abismo sem fim. Tábuas apodrecidas balançam ao vento cortante.
 
 Digite <strong>"atravessar"</strong> para cruzar ou <strong>"desistir"</strong> para voltar.`,opts:{atravessar:"saida",desistir:"gameover_ponte"},roll:false,risk:0.3},
-            ponte_segura:{text:`Graças à <strong>poção do sábio</strong>, suas mãos deixam de tremer. A ponte ainda balança, mas você sente firmeza nos pés.
+            ponte_segura:{text:`Graças à <strong>poção do sábio 🧪</strong>, suas mãos deixam de tremer. A ponte ainda balança, mas você sente firmeza nos pés.
 
 Digite <strong>"atravessar"</strong> para cruzar com confiança.`,opts:{atravessar:"saida"},roll:false,risk:0},
-            saida:{text:`A <strong>saída da floresta</strong>! Raios dourados de sol filtram-se através das copas das árvores, banhando o musgo em luz.
+            saida:{text:`A <strong>saída da floresta 🌤️</strong>! Raios dourados de sol filtram-se através das copas das árvores, banhando o musgo em luz.
 
 Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,risk:0.1},
-            vitoria:{text:` <strong>Você escapou da Floresta Sombria!</strong> <br><br>O reino está salvo. Canções serão compostas sobre sua jornada esta noite, ao redor das fogueiras.`,opts:{},roll:false,risk:0,end:true},
-            gameover_lobo:{text:`O lobo é mais rápido do que sua percepção. Ele salta, mandíbulas se fechando com força mortal...<br><br><strong style='color:#c0392b'> Você morreu. </strong>`,opts:{},roll:false,risk:0,over:true},
-            gameover_cogumelo:{text:`O doce sabor dá lugar a um frio paralisante. Suas pernas cedem enquanto o veneno percorre suas veias...<br><br><strong style='color:#c0392b'> Você morreu. </strong>`,opts:{},roll:false,risk:0,over:true},
-            gameover_trapaca:{text:`Você cambaleia na névoa, tentando encontrar o caminho. O chão cede. Queda. Escuridão.<br><br><strong style='color:#c0392b'> Você morreu. </strong>`,opts:{},roll:false,risk:0,over:true},
-            gameover_ponte:{text:`Uma rajada de vento uiva entre as cordas. Você perde o equilíbrio, braços girando no vazio...<br><br><strong style='color:#c0392b'> Você morreu. </strong>`,opts:{},roll:false,risk:0,over:true},
-            gameover_generico:{text:`A floresta não tolera indecisão. O chão se abre sob seus pés, raízes puxando-o para as profundezas.<br><br><strong style='color:#c0392b'> Você morreu. </strong>`,opts:{},roll:false,risk:0,over:true},
-            gameover_azar:{text:`O destino foi cruel. Uma <strong>armadilha oculta</strong> se ativa sob seus pés — estacas envenenadas brotam do solo.<br><br><strong style='color:#c0392b'> Você morreu. </strong>`,opts:{},roll:false,risk:0,over:true}
+            vitoria:{text:`✨ <strong>Você escapou da Floresta Sombria!</strong> ✨<br><br>O reino está salvo 🏰. Canções serão compostas sobre sua jornada esta noite, ao redor das fogueiras 🔥.`,opts:{},roll:false,risk:0,end:true},
+            gameover_lobo:{text:`O lobo é mais rápido do que sua percepção. Ele salta, mandíbulas se fechando com força mortal...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_cogumelo:{text:`O doce sabor dá lugar a um frio paralisante. Suas pernas cedem enquanto o veneno percorre suas veias...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_trapaca:{text:`Você cambaleia na névoa, tentando encontrar o caminho. O chão cede. Queda. Escuridão.<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_ponte:{text:`Uma rajada de vento uiva entre as cordas. Você perde o equilíbrio, braços girando no vazio...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_generico:{text:`A floresta não tolera indecisão. O chão se abre sob seus pés, raízes puxando-o para as profundezas...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_azar:{text:`O destino foi cruel. Uma <strong>armadilha oculta ⚔️</strong> se ativa sob seus pés — estacas envenenadas brotam do solo.<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true}
         };
 
         /* ===================== STATE ===================== */
@@ -540,14 +539,14 @@ Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,r
             scenes={};
             for(var k in baseScenes) scenes[k]=baseScenes[k];
             var ctxs={
-                heroi:`Você é o <strong>Herói Lendário</strong>, campeão do reino. A Floresta Sombria é apenas mais um desafio em sua jornada épica. Com coragem inabalável, você parte para mais uma vitória.`,
-                knight:`Você é <strong>Sir Cedric</strong>, um nobre cavaleiro em busca de glória. A Floresta Sombria esconde perigos, mas sua espada e honra o guiarão.`,
-                ranger:`Você é um <strong>aventureiro destemido</strong>, movido pela curiosidade e pela promessa de tesouros ocultos. A Floresta Sombria é traiçoeira, mas você confia em seus instintos.`
+                heroi:`Você é o <strong>Herói Lendário 🛡️</strong>, campeão do reino. A Floresta Sombria é apenas mais um desafio em sua jornada épica. Com coragem inabalável, você parte para mais uma vitória.`,
+                knight:`Você é <strong>Sir Cedric ⚔️</strong>, um nobre cavaleiro em busca de glória. A Floresta Sombria esconde perigos, mas sua espada e honra o guiarão.`,
+                ranger:`Você é um <strong>aventureiro destemido 🏹</strong>, movido pela curiosidade e pela promessa de tesouros ocultos. A Floresta Sombria é traiçoeira, mas você confia em seus instintos.`
             };
             var ents={
-                heroi:`Como herói aclamado, você marcha para a <strong>entrada da floresta</strong>. Árvores retorcidas bloqueiam a luz. O vento sussurra avisos, mas sua determinação é inabalável.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`,
-                knight:`Com armadura reluzente, você avança para a <strong>entrada da floresta</strong>. As árvores parecem sussurrar segredos antigos.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`,
-                ranger:`Você está na <strong>entrada da Floresta Sombria</strong>. Árvores retorcidas bloqueiam a luz do sol. O vento sussurra avisos.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`
+                heroi:`Como herói aclamado, você marcha para a <strong>entrada da floresta 🌲</strong>. Árvores retorcidas bloqueiam a luz. O vento sussurra avisos, mas sua determinação é inabalável.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`,
+                knight:`Com armadura reluzente, você avança para a <strong>entrada da floresta 🌲</strong>. As árvores parecem sussurrar segredos antigos.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`,
+                ranger:`Você está na <strong>entrada da Floresta Sombria 🌲</strong>. Árvores retorcidas bloqueiam a luz do sol. O vento sussurra avisos.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`
             };
             scenes.entrada={text:ents[dif],opts:{entrar:"trilha"},roll:false,risk:0};
             return ctxs[dif];
@@ -602,7 +601,7 @@ Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,r
             var inp=norm(raw); if(!inp)return;
             var scn=scenes[cur];
             if(inp==="rolar"){
-                if(scn.roll){doRoll();} else setFeed(" Não há nada para rolar aqui.","info");
+                if(scn.roll){doRoll();} else setFeed("⚠ Não há nada para rolar aqui.","info");
                 return;
             }
             if(!scn.opts||!scn.opts.hasOwnProperty(inp)){ goto("gameover_generico"); return; }
@@ -613,11 +612,11 @@ Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,r
         function doRoll(){
             if(!active)return;
             var scn=scenes[cur];
-            if(!scn.roll){setFeed(" Você não pode rolar dados agora.","info");return;}
+            if(!scn.roll){setFeed("⚠ Você não pode rolar dados agora.","info");return;}
             AudioEngine.sfxDice();
             var r=Math.floor(Math.random()*20)+1;
             var ok=r>=scn.need; var nxt=ok?scn.ok:scn.fail;
-            setFeed(" Você rolou "+r+". "+(ok?"Sucesso!":"Fracasso..."),ok?"ok":"err");
+            setFeed("🎲 Você rolou "+r+". "+(ok?"Sucesso!":"Fracasso..."),ok?"ok":"err");
             goto(nxt,r);
         }
 
@@ -642,8 +641,8 @@ Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,r
 
         bAudio.addEventListener("click",function(){
             AudioEngine.enabled=!AudioEngine.enabled;
-            audioLabel.textContent=" Áudio: "+(AudioEngine.enabled?"Ligado":"Desligado");
-            bAudio.textContent=AudioEngine.enabled?" Desligar Áudio":" Ligar Áudio";
+            audioLabel.textContent="🎵 Áudio: "+(AudioEngine.enabled?"Ligado":"Desligado");
+            bAudio.textContent=AudioEngine.enabled?"🔇 Desligar Áudio":"🔊 Ligar Áudio";
             if(AudioEngine.enabled){
                 if(sc.game.classList.contains("on")&&active) AudioEngine.playGame();
                 else AudioEngine.playMenu(false);
@@ -667,7 +666,7 @@ Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,r
             var sv=localStorage.getItem("fs_volume");
             if(sv!==null){var v=parseInt(sv,10);volSlider.value=v;volVal.textContent=v+"%";AudioEngine.setVolume(v/100);}
             var sa=localStorage.getItem("fs_audio");
-            if(sa!==null){AudioEngine.enabled=sa==="1";audioLabel.textContent=" Áudio: "+(AudioEngine.enabled?"Ligado":"Desligado");bAudio.textContent=AudioEngine.enabled?" Desligar Áudio":" Ligar Áudio";}
+            if(sa!==null){AudioEngine.enabled=sa==="1";audioLabel.textContent="🎵 Áudio: "+(AudioEngine.enabled?"Ligado":"Desligado");bAudio.textContent=AudioEngine.enabled?"🔇 Desligar Áudio":"🔊 Ligar Áudio";}
         }catch(e){}
         AudioEngine.playMenu(true);
         goScreen("menu");
