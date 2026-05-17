@@ -1,10 +1,398 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>RPG da Floresta</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG da Floresta Sombria</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            color: #c0c0c0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #game {
+            background: #111;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 0 15px rgba(0, 150, 0, 0.2);
+        }
+        #story {
+            background: #1a1a1a;
+            padding: 15px;
+            border-left: 4px solid #4a6;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        #command {
+            flex: 1;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: #ccc;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+        #command:disabled {
+            opacity: 0.5;
+        }
+        button {
+            padding: 10px 15px;
+            background: #2a2a2a;
+            border: 1px solid #555;
+            color: #ccc;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: #3a3a3a;
+            border-color: #4a6;
+        }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        #roll-btn {
+            background: #2a2a3a;
+            border-color: #665;
+        }
+        #roll-btn:hover:not(:disabled) {
+            background: #3a3a4a;
+            border-color: #aa8;
+        }
+        #feedback {
+            color: #e66;
+            font-style: italic;
+            min-height: 20px;
+            margin-top: 10px;
+        }
+        .gameover {
+            color: #e44;
+            font-weight: bold;
+            text-shadow: 0 0 5px red;
+        }
+        .victory {
+            color: #4a6;
+            font-weight: bold;
+            text-shadow: 0 0 5px green;
+        }
+    </style>
 </head>
 <body>
-    <h1>Floresta Sombria</h1>
-<h2>Teste</h2>
+    <div id="game">
+        <div id="story"></div>
+        <div id="input-area">
+            <input type="text" id="command" placeholder="Digite seu comando..." autofocus>
+            <button id="submit-btn">Enviar</button>
+        </div>
+        <button id="roll-btn" title="Rolar um D20 (ou digite 'rolar')">🎲 Rolar D20</button>
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ========== CENAS DO JOGO ==========
+            const scenes = {
+                entrada: {
+                    text: "Você está na entrada da Floresta Sombria. Árvores retorcidas bloqueiam a luz do sol. O vento sussurra avisos.\n\nDigite 'entrar' para adentrar a floresta.",
+                    options: { entrar: "trilha" },
+                    allowRoll: false
+                },
+                trilha: {
+                    text: "A trilha se divide em duas. À esquerda, um caminho iluminado por vaga-lumes. À direita, uma escuridão quase palpável.\n\nDigite 'luz' para seguir a luz ou 'escuro' para mergulhar nas sombras.",
+                    options: { luz: "lobo", escuro: "cogumelos" },
+                    allowRoll: false
+                },
+                lobo: {
+                    text: "Um lobo cinzento bloqueia o caminho! Ele rosna, olhos brilhando. Você precisa agir rápido.\n\nDigite 'lutar' para enfrentá-lo ou 'fugir' para correr.",
+                    options: { lutar: "cabana", fugir: "gameover_lobo" },
+                    allowRoll: false
+                },
+                cogumelos: {
+                    text: "Você encontra cogumelos brilhantes no chão. Eles exalam um aroma adocicado e parecem suculentos.\n\nDigite 'comer' para experimentar ou 'ignorar' para seguir em frente.",
+                    options: { comer: "gameover_cogumelo", ignorar: "ponte" },
+                    allowRoll: false
+                },
+                cabana: {
+                    text: "Você chega a uma cabana antiga, coberta de musgo. A porta está entreaberta. Uma luz bruxuleante sai lá de dentro.\n\nDigite 'entrar' para investigar ou 'passar' para evitar a cabana.",
+                    options: { entrar: "interior_cabana", passar: "ponte" },
+                    allowRoll: false
+                },
+                interior_cabana: {
+                    text: "Dentro da cabana, um velho sábio está sentado atrás de uma mesa. Ele sorri e joga dados sobre a mesa.\n\n'Teste sua sorte, aventureiro. Digite 'rolar' para lançar os dados!'",
+                    options: {}, // apenas rolar é permitido
+                    allowRoll: true,
+                    rollMinSuccess: 12,
+                    rollSuccessScene: "sabio_ajuda",
+                    rollFailScene: "sabio_trapaca"
+                },
+                sabio_ajuda: {
+                    text: "", // preenchido dinamicamente
+                    options: { beber: "ponte_segura" },
+                    allowRoll: false,
+                    dynamicText: function(result) {
+                        return `Você tirou ${result} no dado! O sábio sorri e lhe entrega uma poção azul.\n\n"Beba, isso lhe dará forças."\n\nDigite 'beber' para tomar a poção.`;
+                    }
+                },
+                sabio_trapaca: {
+                    text: "",
+                    options: { seguir: "gameover_trapaca" },
+                    allowRoll: false,
+                    dynamicText: function(result) {
+                        return `Você tirou ${result}. O sábio ri maldosamente e desaparece. Uma névoa densa enche a cabana. Você se sente fraco.\n\nDigite 'seguir' para tentar sair.`;
+                    }
+                },
+                ponte: {
+                    text: "Você chega a uma ponte de corda sobre um abismo. O vento balança as tábuas apodrecidas.\n\nDigite 'atravessar' para cruzar ou 'desistir' para voltar.",
+                    options: { atravessar: "saida", desistir: "gameover_ponte" },
+                    allowRoll: false
+                },
+                ponte_segura: {
+                    text: "Graças à poção, você se sente revigorado. A ponte parece menos ameaçadora.\n\nDigite 'atravessar' para cruzar.",
+                    options: { atravessar: "saida" },
+                    allowRoll: false
+                },
+                saida: {
+                    text: "Você avista a saída da floresta! A luz do sol brilha através das últimas árvores.\n\nDigite 'sair' para finalmente escapar.",
+                    options: { sair: "vitoria" },
+                    allowRoll: false
+                },
+                vitoria: {
+                    text: "✨ Você escapou da Floresta Sombria! ✨\n\nO reino está salvo e você é aclamado como herói. Parabéns!",
+                    options: {},
+                    allowRoll: false,
+                    isEnding: true
+                },
+                gameover_lobo: {
+                    text: "Você tenta fugir, mas o lobo é mais rápido. Ele o derruba e...\n\n💀 Você morreu. 💀",
+                    options: {},
+                    allowRoll: false,
+                    isGameOver: true
+                },
+                gameover_cogumelo: {
+                    text: "Você come os cogumelos. Um veneno mortal corre pelas suas veias.\n\n💀 Você morreu. 💀",
+                    options: {},
+                    allowRoll: false,
+                    isGameOver: true
+                },
+                gameover_trapaca: {
+                    text: "Você segue cambaleando pela névoa e cai em um poço profundo.\n\n💀 Você morreu. 💀",
+                    options: {},
+                    allowRoll: false,
+                    isGameOver: true
+                },
+                gameover_ponte: {
+                    text: "Você desiste no meio da ponte. Uma rajada de vento te derruba no abismo.\n\n💀 Você morreu. 💀",
+                    options: {},
+                    allowRoll: false,
+                    isGameOver: true
+                },
+                gameover_generico: {
+                    text: "Ação inválida! A floresta pune os indecisos. Você tropeça e cai em um buraco escuro.\n\n💀 Você morreu. 💀",
+                    options: {},
+                    allowRoll: false,
+                    isGameOver: true
+                }
+            };
+
+            // Estado do jogo
+            let currentSceneId = "entrada";
+            let gameActive = true;
+
+            // Elementos do DOM
+            const storyEl = document.getElementById("story");
+            const commandInput = document.getElementById("command");
+            const submitBtn = document.getElementById("submit-btn");
+            const rollBtn = document.getElementById("roll-btn");
+            const feedbackEl = document.getElementById("feedback");
+
+            // ========== FUNÇÕES ==========
+            function normalize(str) {
+                return str.trim().toLowerCase();
+            }
+
+            function displayScene(sceneId, extraData = null) {
+                const scene = scenes[sceneId];
+                let text = scene.text;
+                if (scene.dynamicText && extraData) {
+                    text = scene.dynamicText(extraData);
+                }
+                storyEl.innerHTML = text.replace(/\n/g, "<br>");
+                
+                // Adiciona classe CSS para finais especiais
+                storyEl.classList.remove("gameover", "victory");
+                if (scene.isGameOver) {
+                    storyEl.classList.add("gameover");
+                } else if (sceneId === "vitoria") {
+                    storyEl.classList.add("victory");
+                }
+
+                // Limpa feedback
+                feedbackEl.textContent = "";
+            }
+
+            function transitionTo(sceneId, extraData = null) {
+                if (!gameActive) return;
+                
+                const scene = scenes[sceneId];
+                displayScene(sceneId, extraData);
+                currentSceneId = sceneId;
+
+                // Se for final (vitória ou game over), desabilita entrada
+                if (scene.isEnding || scene.isGameOver) {
+                    gameActive = false;
+                    commandInput.disabled = true;
+                    submitBtn.disabled = true;
+                    rollBtn.disabled = true;
+                } else {
+                    // Garante que está habilitado
+                    commandInput.disabled = false;
+                    submitBtn.disabled = false;
+                    rollBtn.disabled = false;
+                    commandInput.focus();
+                }
+            }
+
+            function rollDice() {
+                if (!gameActive) return;
+                
+                const scene = scenes[currentSceneId];
+                if (!scene.allowRoll) {
+                    feedbackEl.textContent = "⚠️ Você não pode rolar dados agora.";
+                    return;
+                }
+
+                const roll = Math.floor(Math.random() * 20) + 1;
+                const success = roll >= scene.rollMinSuccess;
+                const nextScene = success ? scene.rollSuccessScene : scene.rollFailScene;
+                
+                // Exibe mensagem temporária do resultado
+                const resultMsg = `🎲 Você rolou ${roll}. ${success ? "Sucesso!" : "Fracasso..."}`;
+                feedbackEl.textContent = resultMsg;
+                
+                // Pequeno delay para o jogador ver o resultado? Melhor transitar imediatamente, mas podemos deixar o feedback.
+                transitionTo(nextScene, roll);
+            }
+
+            function processInput() {
+                if (!gameActive) return;
+                
+                const raw = commandInput.value;
+                const input = normalize(raw);
+                commandInput.value = "";
+                feedbackEl.textContent = "";
+
+                const scene = scenes[currentSceneId];
+
+                // Comando especial "rolar"
+                if (input === "rolar") {
+                    if (scene.allowRoll) {
+                        rollDice();
+                    } else {
+                        feedbackEl.textContent = "⚠️ Não há nada para rolar aqui.";
+                    }
+                    return;
+                }
+
+                // Comandos normais
+                if (scene.options && scene.options.hasOwnProperty(input)) {
+                    const nextId = scene.options[input];
+                    transitionTo(nextId);
+                } else {
+                    // Comando inválido -> game over genérico
+                    transitionTo("gameover_generico");
+                }
+            }
+
+            function restartGame() {
+                // Reinicia tudo
+                gameActive = true;
+                commandInput.disabled = false;
+                submitBtn.disabled = false;
+                rollBtn.disabled = false;
+                commandInput.value = "";
+                feedbackEl.textContent = "";
+                transitionTo("entrada");
+                commandInput.focus();
+            }
+
+            // ========== EVENT LISTENERS ==========
+            submitBtn.addEventListener("click", processInput);
+            rollBtn.addEventListener("click", rollDice);
+
+            commandInput.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    processInput();
+                }
+            });
+
+            // Botão de reiniciar (aparece via tecla R ou botão extra) - vamos adicionar atalho R
+            document.addEventListener("keydown", function(e) {
+                if (e.key === "r" && e.ctrlKey) {
+                    e.preventDefault();
+                    restartGame();
+                }
+            });
+
+            // Botão de reiniciar visível (adicionamos no HTML quando game over/vitória)
+            // Vamos injetar um botão de restart dinamicamente quando necessário.
+            // Mas é mais simples adicionar um parágrafo fixo com instrução.
+            // Vamos criar uma div extra no HTML para botão de restart.
+
+            // Adiciona um botão de restart no final da página do jogo
+            const restartDiv = document.createElement("div");
+            restartDiv.id = "restart-area";
+            restartDiv.style.marginTop = "20px";
+            restartDiv.style.textAlign = "center";
+            restartDiv.innerHTML = '<button id="restart-btn" style="display:none;">🔄 Reiniciar Jornada</button>';
+            document.getElementById("game").appendChild(restartDiv);
+
+            const restartBtn = document.getElementById("restart-btn");
+            restartBtn.addEventListener("click", restartGame);
+
+            // Exibe/esconde botão de restart conforme estado
+            function updateRestartButton() {
+                if (!gameActive) {
+                    restartBtn.style.display = "inline-block";
+                } else {
+                    restartBtn.style.display = "none";
+                }
+            }
+
+            // Sobrescreve transitionTo para também atualizar botão de restart
+            const originalTransition = transitionTo;
+            transitionTo = function(sceneId, extraData) {
+                originalTransition(sceneId, extraData);
+                updateRestartButton();
+            };
+
+            // ========== INICIALIZAÇÃO ==========
+            transitionTo("entrada");
+            updateRestartButton();
+        })();
+    </script>
 </body>
 </html>
