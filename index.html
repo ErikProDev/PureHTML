@@ -3,1071 +3,674 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Floresta Sombria - RPG</title>
+    <title>🌿 Floresta Sombria — RPG</title>
+
+    <!-- Fontes externas estilo cartoon/fantasia -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Press+Start+2P&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --panel: #111;
-            --border: #3a3a3a;
-            --accent: #4a6;
-            --accent-dim: #2a4a3a;
-            --text: #c0c0c0;
-            --text-bright: #e0e0e0;
-            --danger: #e44;
-            --danger-glow: rgba(228, 68, 68, 0.4);
-            --gold: #aa8;
-            --gold-glow: rgba(170, 170, 136, 0.3);
-            --shadow-green: rgba(0, 120, 0, 0.25);
+        :root{
+            --zelda-green:#2e8b2e;
+            --zelda-gold:#d4a017;
+            --zelda-brown:#5c3a1e;
+            --zelda-sky:#87ceeb;
+            --zelda-red:#c0392b;
+            --zelda-dark:#1a2f0e;
+            --zelda-parchment:#f5e6c8;
+            --zelda-shadow:0 6px 0 rgba(0,0,0,0.25);
+            --zelda-border:4px solid #5c3a1e;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            height: 100%;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{
+            height:100%;
+            background: radial-gradient(ellipse at center, #1a3c10 0%, #0d1f06 100%);
+            color:#f5e6c8;
+            font-family:'MedievalSharp', cursive;
+            overflow:hidden;
         }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        body{
+            display:flex;justify-content:center;align-items:center;padding:16px;
         }
-        #game-container {
-            background: var(--panel);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 28px;
-            max-width: 640px;
-            width: 100%;
-            box-shadow: 0 0 30px var(--shadow-green), inset 0 0 60px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-            min-height: 420px;
-            display: flex;
-            flex-direction: column;
+        #game{
+            width:100%;max-width:720px;
+            background: linear-gradient(180deg, #f5e6c8 0%, #e8d5a3 50%, #d4b87a 100%);
+            border:6px solid #5c3a1e;
+            border-radius:24px;
+            box-shadow:
+                0 0 0 4px #3a2510,
+                0 0 0 8px #b08b4c,
+                0 12px 30px rgba(0,0,0,0.6),
+                inset 0 2px 10px rgba(255,255,200,0.6);
+            position:relative; overflow:hidden; min-height:520px;
+            display:flex;flex-direction:column;
+            font-family:'MedievalSharp', cursive;
         }
-        /* Decorative scanline */
-        #game-container::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0,0,0,0.15) 2px,
-                rgba(0,0,0,0.15) 4px
-            );
-            pointer-events: none;
-            z-index: 10;
-            border-radius: inherit;
+        /* Moldura decorativa interna */
+        #game::before{
+            content:"";
+            position:absolute;inset:10px;pointer-events:none;z-index:60;
+            border:3px dashed #b08b4c;
+            border-radius:16px;
+            opacity:0.5;
+        }
+        .screen{
+            position:absolute;inset:18px;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            padding:20px; opacity:0;visibility:hidden;
+            transition:opacity .5s ease, visibility .5s ease; z-index:5;
+            background:rgba(245,230,200,0.85);
+            border-radius:12px;
+            backdrop-filter:blur(2px);
+        }
+        .screen.on{opacity:1;visibility:visible;z-index:10}
+
+        /* Tipografia Zelda */
+        h1{
+            font-family:'Press Start 2P', cursive;
+            font-size:1.4rem;
+            color:#2e8b2e;
+            text-align:center;
+            text-shadow:
+                0 2px 0 #1a3c10,
+                0 4px 0 rgba(0,0,0,0.2);
+            margin-bottom:16px;
+            line-height:1.6;
+            letter-spacing:2px;
+        }
+        h2{
+            font-family:'Press Start 2P', cursive;
+            font-size:1rem;
+            color:#5c3a1e;
+            text-align:center;
+            text-shadow:0 2px 0 rgba(212,160,23,0.6);
+            margin-bottom:20px;
+            letter-spacing:2px;
+        }
+        .sep{
+            width:70%;height:6px;
+            background: linear-gradient(90deg, transparent, #d4a017, #2e8b2e, #d4a017, transparent);
+            border-radius:3px;
+            margin:0 auto 20px;
+            box-shadow:0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* Screen system with visibility for smooth fade */
-        .screen {
-            position: absolute;
-            inset: 28px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
+        /* Botões estilo Zelda */
+        button,.btn{
+            display:block;width:100%;max-width:340px; padding:16px 20px;margin:10px 0;
+            background: linear-gradient(180deg, #f5e6c8 0%, #d4b87a 100%);
+            border:4px solid #5c3a1e;
+            border-radius:16px;
+            color:#3a2510;
+            font-family:'MedievalSharp', cursive;
+            font-size:1.3rem;
+            font-weight:700;
+            letter-spacing:2px;
+            cursor:pointer;
+            transition:all 0.2s ease;
+            position:relative;
+            box-shadow:
+                0 6px 0 #3a2510,
+                0 8px 12px rgba(0,0,0,0.3);
+            text-shadow:1px 1px 0 rgba(255,255,200,0.8);
         }
-        .screen.active {
-            opacity: 1;
-            visibility: visible;
-            z-index: 6;
+        button::after{
+            content:"";
+            position:absolute;
+            top:4px;left:10px;right:10px;height:40%;
+            background:rgba(255,255,255,0.4);
+            border-radius:10px;
+            pointer-events:none;
         }
-
-        h1, h2 {
-            color: #cfc;
-            margin-bottom: 24px;
-            text-shadow: 0 0 10px var(--accent), 0 0 20px rgba(74,170,102,0.3);
-            text-align: center;
-            letter-spacing: 2px;
+        button:hover:not(:disabled){
+            transform:translateY(-3px);
+            box-shadow:
+                0 9px 0 #3a2510,
+                0 12px 18px rgba(0,0,0,0.4);
+            background: linear-gradient(180deg, #fff3cd 0%, #e8c860 100%);
+            border-color:#7a4e1e;
+            color:#1a2f0e;
         }
-        h1 { font-size: 2rem; }
-        h2 { font-size: 1.5rem; }
-
-        button, .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            background: linear-gradient(180deg, #222, #1a1a1a);
-            border: 1px solid #555;
-            color: var(--text-bright);
-            font-family: inherit;
-            font-size: 17px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
+        button:active:not(:disabled){
+            transform:translateY(3px);
+            box-shadow:
+                0 2px 0 #3a2510,
+                0 4px 8px rgba(0,0,0,0.3);
         }
-        button::after, .btn::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s;
-        }
-        button:hover::after, .btn:hover::after { transform: translateX(100%); }
-        button:hover:not(:disabled), .btn:hover:not(:disabled) {
-            background: linear-gradient(180deg, #2a2a2a, #222);
-            border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 12px rgba(74,170,102,0.2);
-            transform: translateY(-1px);
-        }
-        button:disabled, .btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            filter: grayscale(0.8);
-        }
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
-        .btn-row button { flex: 1; }
-
-        /* Options specific */
-        #audio-status {
-            margin: 10px 0 6px;
-            font-size: 0.95rem;
-            color: #888;
-        }
-        #volume-control {
-            margin: 14px 0;
-            width: 100%;
-            text-align: center;
-        }
-        #volume-control label { display: block; margin-bottom: 6px; color: #888; font-size: 0.9rem; }
-        #volume-slider {
-            width: 80%;
-            accent-color: var(--accent);
-        }
-        #volume-value { display: inline-block; min-width: 36px; margin-left: 6px; color: var(--accent); }
-
-        /* Context screen */
-        #screen-contexto {
-            justify-content: center;
-            text-align: center;
-        }
-        #contexto-texto {
-            font-size: 1.15rem;
-            line-height: 1.7;
-            color: #b8d4b8;
-            text-shadow: 0 0 8px rgba(74,170,102,0.2);
-            max-width: 90%;
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity 1.2s ease, transform 1.2s ease;
-        }
-        #screen-contexto.active #contexto-texto {
-            opacity: 1;
-            transform: translateY(0);
+        button:disabled{
+            opacity:0.5;
+            cursor:not-allowed;
+            filter:grayscale(0.4);
+            transform:none;
         }
 
-        /* Game screen */
-        #screen-jogo {
-            align-items: stretch;
-            justify-content: flex-start;
+        /* Botão de Herói (verde) */
+        #b-hero{ border-left:6px solid #2e8b2e; background: linear-gradient(180deg, #e0f0d0 0%, #a8d080 100%);}
+        #b-hero:hover:not(:disabled){ border-color:#2e8b2e; box-shadow:0 9px 0 #1a4a1a, 0 0 20px rgba(46,139,46,0.5);}
+        /* Botão de Cavaleiro (laranja) */
+        #b-knight{ border-left:6px solid #d4782e; background: linear-gradient(180deg, #fce0c0 0%, #e0a050 100%);}
+        #b-knight:hover:not(:disabled){ border-color:#d4782e; box-shadow:0 9px 0 #7a3e1e, 0 0 20px rgba(212,120,46,0.5);}
+        /* Botão de Aventureiro (azul) */
+        #b-ranger{ border-left:6px solid #3e8ed4; background: linear-gradient(180deg, #d0e8f8 0%, #80b8e0 100%);}
+        #b-ranger:hover:not(:disabled){ border-color:#3e8ed4; box-shadow:0 9px 0 #1e3e7a, 0 0 20px rgba(62,142,212,0.5);}
+
+        /* Botão enviar e dados */
+        #send-btn{
+            width:auto; padding:12px 18px; font-size:1.2rem;
+            background: linear-gradient(180deg, #c0e8a0 0%, #6a9e3a 100%);
+            border-color:#3a6e1e; color:#f0ffe0;
+            text-shadow:1px 1px 0 #1a3c10;
         }
-        #story-wrap {
-            position: relative;
-            flex: 1;
-            min-height: 140px;
-            margin-bottom: 18px;
+        #dice-btn{
+            display:none; max-width:160px;align-self:flex-start;
+            background: linear-gradient(180deg, #ffe8a0 0%, #d4a017 100%);
+            border-color:#6b4c1e; color:#3a2510; font-size:1rem; padding:10px 16px;
+            border-radius:16px; margin-bottom:8px;
         }
-        #story {
-            background: linear-gradient(180deg, #1a1a1a, #151515);
-            padding: 18px;
-            border-left: 4px solid var(--accent);
-            border-radius: 0 8px 8px 0;
-            line-height: 1.65;
-            min-height: 120px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-size: 1.05rem;
-            color: #d0d0d0;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+        #dice-btn.on{display:block}
+        #dice-btn:hover:not(:disabled){ box-shadow:0 9px 0 #4a3a1e, 0 0 20px rgba(212,160,23,0.6);}
+        #restart-btn{
+            display:none;margin-top:14px;
+            background: linear-gradient(180deg, #f8c0b0 0%, #c0392b 100%);
+            border-color:#6e1e1e; color:#ffe0e0; text-shadow:1px 1px 0 #3a1010;
         }
-        #story.show {
-            opacity: 1;
-            transform: translateY(0);
+        #restart-btn.on{display:block}
+        #restart-btn:hover:not(:disabled){ box-shadow:0 9px 0 #4a1a1a, 0 0 20px rgba(192,57,43,0.6);}
+
+        .row{display:flex;gap:12px;width:100%;max-width:340px;justify-content:center}
+        .row button{flex:1;max-width:none}
+
+        /* Opções e labels */
+        .opt-label{color:#5c3a1e;font-size:1rem;margin-bottom:6px;text-align:center;font-weight:700;}
+        #vol-wrap{width:100%;max-width:280px;margin:10px auto 18px;text-align:center}
+        #vol-slider{width:100%;accent-color:#2e8b2e;cursor:pointer}
+        #vol-val{display:inline-block;min-width:36px;margin-left:6px;color:#2e8b2e;font-weight:700;font-size:1.1rem;}
+        #audio-label{text-align:center;margin-bottom:8px;color:#5c3a1e;font-size:1rem;font-weight:700;}
+
+        /* Contexto */
+        #ctx-text{
+            max-width:520px;text-align:center;line-height:1.8;
+            color:#3a2510; font-size:1.2rem; font-weight:700;
+            opacity:0;transform:translateY(10px);
+            transition:opacity 1.2s ease, transform 1.2s ease;
+            text-shadow:1px 1px 0 rgba(245,230,200,0.8);
         }
-        #story.gameover-text {
-            color: #ff8888;
-            border-left-color: var(--danger);
-            text-shadow: 0 0 6px var(--danger-glow);
-            animation: glitch 0.3s ease-in-out infinite alternate;
+        .screen.on #ctx-text{opacity:1;transform:translateY(0)}
+
+        /* Área do jogo – tela ampliada para evitar rolagem */
+        #screen-game{
+            align-items:stretch;justify-content:flex-start;
+            padding:16px 20px;
         }
-        #story.victory-text {
-            color: #cfc;
-            border-left-color: var(--accent);
-            text-shadow: 0 0 10px rgba(74,170,102,0.5), 0 0 20px rgba(74,170,102,0.2);
-            animation: glowPulse 2s ease-in-out infinite;
+        #story-box{
+            flex:2.5;
+            min-height:260px;
+            margin-bottom:12px;
+            background: rgba(245,230,200,0.9);
+            border:4px solid #5c3a1e;
+            border-radius:16px; padding:16px;
+            line-height:1.7; font-size:1.2rem; color:#2c1a0a;
+            box-shadow:
+                inset 0 0 20px rgba(92,58,30,0.3),
+                0 6px 0 #3a2510;
+            overflow-y:auto;
+            opacity:0;transform:translateY(6px);
+            transition:opacity .45s ease, transform .45s ease, border-color .4s ease;
         }
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-1px, 1px); }
-            40% { transform: translate(1px, -1px); }
-            60% { transform: translate(-1px, -1px); }
-            80% { transform: translate(1px, 1px); }
-            100% { transform: translate(0); }
+        #story-box.on{opacity:1;transform:translateY(0)}
+        #story-box.danger{
+            border-color:#c0392b; color:#6e1e1e;
+            background:rgba(255,220,210,0.9);
+            box-shadow:inset 0 0 20px rgba(192,57,43,0.3), 0 6px 0 #6e1e1e;
         }
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(74,170,102,0.2); }
-            50% { box-shadow: 0 0 25px rgba(74,170,102,0.45); }
+        #story-box.gold{
+            border-color:#d4a017; color:#3a2510;
+            background:rgba(255,245,200,0.9);
+            box-shadow:inset 0 0 20px rgba(212,160,23,0.3), 0 6px 0 #6b4c1e;
         }
 
-        #input-area {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
+        /* 🟢 NOVO DESTAQUE SIMPLES: apenas cor e negrito, sem fundo */
+        #story strong, #story b {
+            color: #2e8b2e;   /* verde Zelda */
+            font-weight: 900;
         }
-        #command {
-            flex: 1;
-            padding: 12px;
-            background: #1e1e1e;
-            border: 1px solid #444;
-            color: #eee;
-            font-family: inherit;
-            font-size: 16px;
-            border-radius: 6px;
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        #command:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 8px rgba(74,170,102,0.15);
-        }
-        #command:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        #submit-btn {
-            width: auto;
-            padding: 12px 18px;
-        }
-        #roll-btn {
-            background: linear-gradient(180deg, #2a2a3a, #222233);
-            border-color: #665;
-            display: none;
-            margin-bottom: 10px;
-        }
-        #roll-btn.visible { display: block; }
-        #roll-btn:hover:not(:disabled) {
-            background: linear-gradient(180deg, #33334a, #2a2a3a);
-            border-color: var(--gold);
-            box-shadow: 0 0 12px var(--gold-glow);
-        }
-        #feedback {
-            color: #e66;
-            font-style: italic;
-            min-height: 24px;
-            margin-top: 8px;
-            font-size: 0.95rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        #feedback.show { opacity: 1; }
-        #restart-btn {
-            display: none;
-            margin-top: 16px;
-            width: 100%;
-            background: linear-gradient(180deg, #3a1a1a, #2a1111);
-            border-color: #855;
-        }
-        #restart-btn:hover {
-            border-color: var(--danger);
-            box-shadow: 0 0 12px var(--danger-glow);
-        }
+        /* Nos finais de game over, mantemos a cor vermelha definida inline */
 
-        /* Cursor blink for typewriter feel */
-        .cursor::after {
-            content: "▋";
-            animation: blink 1s step-end infinite;
-            color: var(--accent);
-            margin-left: 2px;
+        #input-row{display:flex;gap:8px;margin-bottom:8px}
+        #cmd{
+            flex:1; padding:14px; background:#fef9e0;
+            border:4px solid #5c3a1e; border-radius:12px;
+            color:#2c1a0a; font-family:'MedievalSharp', cursive;
+            font-size:1.1rem; letter-spacing:1px;
+            outline:none; transition:border-color .3s, box-shadow .3s;
+            box-shadow:inset 0 2px 6px rgba(0,0,0,0.15);
         }
-        @keyframes blink { 50% { opacity: 0; } }
+        #cmd:focus{border-color:#2e8b2e; box-shadow:0 0 12px rgba(46,139,46,0.4), inset 0 2px 6px rgba(0,0,0,0.2);}
+        #cmd:disabled{opacity:.5;cursor:not-allowed}
 
-        /* Responsive */
-        @media (max-width: 520px) {
-            #game-container { padding: 18px; }
-            h1 { font-size: 1.5rem; }
-            h2 { font-size: 1.2rem; }
-            .screen { inset: 18px; }
-            .btn-row { flex-direction: column; gap: 8px; }
-            #story { font-size: 0.95rem; padding: 14px; }
+        #feedback{
+            min-height:22px;margin-top:6px; font-size:1rem;
+            opacity:0;transition:opacity .3s; font-weight:700;
+            text-shadow:1px 1px 0 rgba(255,255,200,0.7);
+        }
+        #feedback.on{opacity:1}
+        #feedback.err{color:#c0392b} #feedback.ok{color:#2e8b2e} #feedback.info{color:#b8860b}
+
+        .cursor::after{
+            content:"▋"; animation:blink 1s step-end infinite;
+            color:#2e8b2e; margin-left:2px;
+        }
+        @keyframes blink{50%{opacity:0}}
+
+        /* Scrollbar estilizada */
+        #story-box::-webkit-scrollbar{width:10px}
+        #story-box::-webkit-scrollbar-track{background:#e8d5a3; border-radius:8px;}
+        #story-box::-webkit-scrollbar-thumb{background:#5c3a1e; border-radius:8px; border:2px solid #d4b87a;}
+
+        @media(max-width:540px){
+            #game{min-height:460px} h1{font-size:1rem}h2{font-size:0.8rem}
+            .screen{padding:12px} .row{flex-direction:column;gap:8px}
+            #story-box{font-size:1rem;padding:12px; min-height:220px;}
+            button{font-size:1.1rem;padding:12px 16px;}
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- Menu Principal -->
-        <div id="screen-menu" class="screen active">
-            <h1>🌲 Floresta Sombria</h1>
-            <button id="btn-iniciar">Iniciar Jornada</button>
-            <button id="btn-opcoes">Opções</button>
-            <button id="btn-sobre">Sobre</button>
+    <div id="game">
+        <!-- MENU -->
+        <div id="sc-menu" class="screen on">
+            <h1>🌿 A Lenda da Floresta</h1>
+            <div class="sep"></div>
+            <button id="b-start">🗡️ Iniciar Jornada</button>
+            <button id="b-opts">⚙️ Opções</button>
+            <button id="b-about">📜 Sobre</button>
         </div>
-
-        <!-- Menu Opções -->
-        <div id="screen-opcoes" class="screen">
-            <h2>Opções</h2>
-            <div id="audio-status">Áudio: Ligado</div>
-            <button id="btn-audio">Desligar Áudio</button>
-            <div id="volume-control">
-                <label for="volume-slider">Volume Mestre</label>
-                <input type="range" id="volume-slider" min="0" max="100" value="70">
-                <span id="volume-value">70%</span>
+        <!-- OPTIONS -->
+        <div id="sc-opts" class="screen">
+            <h2>⚙️ Opções</h2>
+            <div class="sep"></div>
+            <div id="audio-label">🎵 Áudio: Ligado</div>
+            <button id="b-audio">🔇 Desligar Áudio</button>
+            <div id="vol-wrap">
+                <div class="opt-label">🔊 Volume</div>
+                <input type="range" id="vol-slider" min="0" max="100" value="70">
+                <span id="vol-val">70%</span>
             </div>
-            <button id="btn-voltar-opcoes">Voltar</button>
+            <button id="b-back-opts">↩️ Voltar</button>
         </div>
-
-        <!-- Menu Sobre -->
-        <div id="screen-sobre" class="screen">
-            <h2>Sobre</h2>
-            <p style="text-align:center; margin-bottom:20px; line-height:1.6; color:#999;">
-                Criado por <strong style="color:#cfc;">Erik</strong> com a ajuda do <strong style="color:#cfc;">Deepseek</strong><br>
-                RPG de digitação com sistema de dados e múltiplos finais.
+        <!-- ABOUT -->
+        <div id="sc-about" class="screen">
+            <h2>📜 Pergaminho do Criador</h2>
+            <div class="sep"></div>
+            <p style="text-align:center;line-height:1.8;color:#3a2510;max-width:400px;margin-bottom:22px;font-size:1.1rem;font-weight:700;">
+                Forjado por <strong style="color:#2e8b2e;">Erik</strong> com a sabedoria do
+                <strong style="color:#d4a017;">Deepseek</strong><br>
+                ✦ RPG de digitação com dados e finais épicos ✦
             </p>
-            <button id="btn-voltar-sobre">Voltar</button>
+            <button id="b-back-about">↩️ Voltar</button>
         </div>
-
-        <!-- Seleção de Personagem -->
-        <div id="screen-dificuldade" class="screen">
-            <h2>Escolha seu Caminho</h2>
-            <div class="btn-row">
-                <button id="btn-heroi">🛡️ Herói</button>
-                <button id="btn-cavaleiro">⚔️ Cavaleiro</button>
-                <button id="btn-aventureiro">🏹 Aventureiro</button>
+        <!-- DIFFICULTY -->
+        <div id="sc-diff" class="screen">
+            <h2>🗺️ Escolha seu Destino</h2>
+            <div class="sep"></div>
+            <div class="row">
+                <button id="b-hero">🛡️ Herói</button>
+                <button id="b-knight">⚔️ Cavaleiro</button>
+                <button id="b-ranger">🏹 Aventureiro</button>
             </div>
-            <button id="btn-voltar-dificuldade" style="margin-top:14px;">Voltar</button>
+            <button id="b-back-diff" style="margin-top:14px;">↩️ Voltar</button>
         </div>
-
-        <!-- Contexto -->
-        <div id="screen-contexto" class="screen">
-            <p id="contexto-texto"></p>
+        <!-- CONTEXT -->
+        <div id="sc-ctx" class="screen">
+            <p id="ctx-text"></p>
         </div>
-
-        <!-- Área do Jogo -->
-        <div id="screen-jogo" class="screen">
-            <div id="story-wrap"><div id="story"></div></div>
-            <div id="input-area">
-                <input type="text" id="command" placeholder="Digite seu comando..." autocomplete="off" spellcheck="false" autofocus>
-                <button id="submit-btn">Enviar</button>
+        <!-- GAME -->
+        <div id="sc-game" class="screen">
+            <div id="story-box"><div id="story"></div></div>
+            <div id="input-row">
+                <input type="text" id="cmd" placeholder="⚔️ Digite seu comando..." autocomplete="off" spellcheck="false">
+                <button id="send-btn">▶</button>
             </div>
-            <button id="roll-btn" title="Rolar um D20">🎲 Rolar D20</button>
+            <button id="dice-btn" title="Rolar D20">🎲 Rolar D20</button>
             <div id="feedback"></div>
-            <button id="restart-btn">🔄 Reiniciar Jornada</button>
+            <button id="restart-btn">💀 Reiniciar Jornada</button>
         </div>
     </div>
 
+    <!-- ========== SEUS ARQUIVOS DE ÁUDIO ========== -->
+    <audio id="audio-menu" loop preload="auto">
+        <source src="musica_menu.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-game" loop preload="auto">
+        <source src="musica_jogo.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-gameover" loop preload="auto">
+        <source src="musica_gameover.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-vitoria" loop preload="auto">
+        <source src="musica_vitoria.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfx-dice" preload="auto">
+        <source src="dado.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="sfx-click" preload="auto">
+        <source src="tecla.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
-    (function() {
+    (function(){
         "use strict";
 
-        // ===================== AUDIO ENGINE (Web Audio API) =====================
-        // Procedural audio: no external files needed. Respects browser autoplay policy.
-        const AudioEngine = {
-            ctx: null,
-            masterGain: null,
-            enabled: true,
-            volume: 0.7,
-            currentTrack: null,
-            nextTrackTimeout: null,
-            analyser: null,
-
-            init() {
-                if (this.ctx) return;
-                const AC = window.AudioContext || window.webkitAudioContext;
-                if (!AC) return;
-                this.ctx = new AC();
-                this.masterGain = this.ctx.createGain();
-                this.masterGain.gain.value = this.volume;
-                this.masterGain.connect(this.ctx.destination);
-                this.analyser = this.ctx.createAnalyser();
-                this.analyser.fftSize = 64;
-                this.masterGain.connect(this.analyser);
+        /* ===================== AUDIO ENGINE ===================== */
+        var AudioEngine={
+            enabled:true,
+            vol:0.7,
+            current:null,
+            _clickAllowed:true,
+            elements:{
+                menu: document.getElementById('audio-menu'),
+                game: document.getElementById('audio-game'),
+                over: document.getElementById('audio-gameover'),
+                win: document.getElementById('audio-vitoria'),
+                dice: document.getElementById('sfx-dice'),
+                click: document.getElementById('sfx-click')
             },
-
-            ensure() {
-                if (!this.ctx) this.init();
-                if (this.ctx && this.ctx.state === "suspended") {
-                    this.ctx.resume();
+            _ensure:function(){},
+            _resume:function(){},
+            _stop:function(){
+                if(this.current){
+                    this.current.pause();
+                    this.current.currentTime=0;
+                    this.current=null;
                 }
             },
-
-            setVolume(v) {
-                this.volume = v;
-                if (this.masterGain) {
-                    // Smooth ramp to avoid clicks
-                    const now = this.ctx.currentTime;
-                    this.masterGain.gain.setTargetAtTime(v, now, 0.05);
+            setVolume:function(v){
+                this.vol=v;
+                for(var k in this.elements){
+                    if(this.elements[k]) this.elements[k].volume=v;
                 }
             },
-
-            stopCurrent() {
-                if (this.currentTrack) {
-                    const t = this.currentTrack;
-                    const now = this.ctx ? this.ctx.currentTime : 0;
-                    try {
-                        t.gain.gain.setTargetAtTime(0.0001, now, 0.15);
-                        setTimeout(() => { try { t.stop(); t.cleanup(); } catch(e){} }, 400);
-                    } catch(e) {}
-                    this.currentTrack = null;
+            _play:function(key, forceRestart){
+                if(!this.enabled)return;
+                var el=this.elements[key];
+                if(!el)return;
+                if(this.current === el && !el.paused && !forceRestart) return;
+                if(this.current && this.current !== el){
+                    this.current.pause();
+                    this.current.currentTime=0;
                 }
-                if (this.nextTrackTimeout) {
-                    clearTimeout(this.nextTrackTimeout);
-                    this.nextTrackTimeout = null;
+                if(this.current !== el || forceRestart){
+                    el.currentTime=0;
                 }
+                el.volume=this.vol;
+                var p=el.play();
+                if(p&&p.catch) p.catch(function(){});
+                this.current=el;
             },
-
-            playMenu() {
-                if (!this.enabled) return;
-                this.ensure();
-                this.stopCurrent();
-                // Gentle ambient pad: two low sines with slow beating
-                const t = this._createTrack();
-                const o1 = this.ctx.createOscillator();
-                const o2 = this.ctx.createOscillator();
-                const g1 = this.ctx.createGain();
-                const g2 = this.ctx.createGain();
-                const filter = this.ctx.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.value = 600;
-                filter.Q.value = 0.5;
-
-                o1.type = "sine"; o1.frequency.value = 110; // A2
-                o2.type = "sine"; o2.frequency.value = 112; // slight detune for beating
-                g1.gain.value = 0.25;
-                g2.gain.value = 0.25;
-
-                // LFO for slow volume swell
-                const lfo = this.ctx.createOscillator();
-                lfo.type = "sine"; lfo.frequency.value = 0.15;
-                const lfoGain = this.ctx.createGain(); lfoGain.gain.value = 0.15;
-                lfo.connect(lfoGain); lfoGain.connect(g1.gain); lfoGain.connect(g2.gain);
-                lfo.start();
-
-                o1.connect(g1); g1.connect(filter);
-                o2.connect(g2); g2.connect(filter);
-                filter.connect(t.gain);
-                t.gain.connect(this.masterGain);
-
-                o1.start(); o2.start();
-                t.oscillators.push(o1, o2, lfo);
-                t.gains.push(g1, g2, lfoGain);
-                t.nodes.push(filter);
-
-                t.gain.gain.setTargetAtTime(1, this.ctx.currentTime, 0.4);
-                this.currentTrack = t;
+            playMenu:function(forceRestart){
+                this._play('menu', forceRestart || false);
             },
-
-            playGame() {
-                if (!this.enabled) return;
-                this.ensure();
-                this.stopCurrent();
-                const t = this._createTrack();
-                // Tense drone: triangle wave filtered low, with occasional noise burst
-                const o = this.ctx.createOscillator();
-                o.type = "triangle";
-                o.frequency.value = 65; // C2-ish
-                const g = this.ctx.createGain();
-                g.gain.value = 0.35;
-                const filter = this.ctx.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.value = 320;
-                filter.Q.value = 2;
-
-                // Slow filter sweep LFO
-                const lfo = this.ctx.createOscillator();
-                lfo.type = "sine"; lfo.frequency.value = 0.08;
-                const lfoGain = this.ctx.createGain(); lfoGain.gain.value = 120;
-                lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
-                lfo.start();
-
-                o.connect(g); g.connect(filter); filter.connect(t.gain);
-                t.gain.connect(this.masterGain);
-                o.start();
-                t.oscillators.push(o, lfo);
-                t.gains.push(g, lfoGain);
-                t.nodes.push(filter);
-                t.gain.gain.setTargetAtTime(1, this.ctx.currentTime, 0.6);
-                this.currentTrack = t;
+            playGame:function(){ this._play('game', true); },
+            playOver:function(){ this._play('over', true); },
+            playWin:function(){ this._play('win', true); },
+            sfxDice:function(){
+                if(!this.enabled)return;
+                var el=this.elements.dice;
+                if(!el)return;
+                el.volume=this.vol*0.8;
+                el.currentTime=0;
+                el.play().catch(function(){});
             },
-
-            playGameOver() {
-                if (!this.enabled) return;
-                this.ensure();
-                this.stopCurrent();
-                const t = this._createTrack();
-                // Dissonant low cluster
-                const freqs = [55, 58, 61];
-                freqs.forEach(f => {
-                    const o = this.ctx.createOscillator();
-                    o.type = "sawtooth"; o.frequency.value = f;
-                    const g = this.ctx.createGain(); g.gain.value = 0.12;
-                    const f2 = this.ctx.createBiquadFilter();
-                    f2.type = "lowpass"; f2.frequency.value = 240;
-                    o.connect(g); g.connect(f2); f2.connect(t.gain);
-                    o.start();
-                    t.oscillators.push(o);
-                    t.gains.push(g);
-                    t.nodes.push(f2);
-                });
-                t.gain.connect(this.masterGain);
-                t.gain.gain.setTargetAtTime(1, this.ctx.currentTime, 0.3);
-                this.currentTrack = t;
-            },
-
-            playVictory() {
-                if (!this.enabled) return;
-                this.ensure();
-                this.stopCurrent();
-                const t = this._createTrack();
-                // Major arpeggio using 3 sines
-                const now = this.ctx.currentTime;
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C major ish
-                notes.forEach((freq, i) => {
-                    const o = this.ctx.createOscillator();
-                    o.type = "sine"; o.frequency.value = freq;
-                    const g = this.ctx.createGain();
-                    g.gain.setValueAtTime(0, now);
-                    g.gain.linearRampToValueAtTime(0.12, now + 0.3 + i * 0.25);
-                    g.gain.exponentialRampToValueAtTime(0.0001, now + 3.5 + i * 0.3);
-                    o.connect(g); g.connect(t.gain);
-                    o.start(now + i * 0.25);
-                    o.stop(now + 4.5 + i * 0.3);
-                    t.oscillators.push(o);
-                    t.gains.push(g);
-                });
-                t.gain.connect(this.masterGain);
-                t.gain.gain.setTargetAtTime(1, now, 0.3);
-                this.currentTrack = t;
-                // Auto stop track reference after done
-                this.nextTrackTimeout = setTimeout(() => { this.currentTrack = null; }, 6000);
-            },
-
-            sfxDice() {
-                if (!this.enabled || !this.ctx) return;
-                const now = this.ctx.currentTime;
-                const o = this.ctx.createOscillator();
-                o.type = "square";
-                o.frequency.setValueAtTime(800, now);
-                o.frequency.exponentialRampToValueAtTime(120, now + 0.25);
-                const g = this.ctx.createGain();
-                g.gain.setValueAtTime(0.15, now);
-                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
-                const filter = this.ctx.createBiquadFilter();
-                filter.type = "highpass"; filter.frequency.value = 400;
-                o.connect(filter); filter.connect(g); g.connect(this.masterGain);
-                o.start(now); o.stop(now + 0.3);
-            },
-
-            sfxType() {
-                if (!this.enabled || !this.ctx) return;
-                // Very subtle click
-                const now = this.ctx.currentTime;
-                const o = this.ctx.createOscillator();
-                o.type = "triangle";
-                o.frequency.setValueAtTime(1200, now);
-                const g = this.ctx.createGain();
-                g.gain.setValueAtTime(0.02, now);
-                g.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
-                o.connect(g); g.connect(this.masterGain);
-                o.start(now); o.stop(now + 0.04);
-            },
-
-            _createTrack() {
-                const g = this.ctx.createGain();
-                g.gain.value = 0;
-                return { gain: g, oscillators: [], gains: [], nodes: [], stop() {
-                    this.oscillators.forEach(o => { try { o.stop(); } catch(e){} });
-                }, cleanup() {
-                    this.oscillators.forEach(o => { try { o.disconnect(); } catch(e){} });
-                    this.gains.forEach(gn => { try { gn.disconnect(); } catch(e){} });
-                    this.nodes.forEach(n => { try { n.disconnect(); } catch(e){} });
-                    try { this.gain.disconnect(); } catch(e){}
-                }};
+            sfxClick:function(){
+                if(!this.enabled || !this._clickAllowed)return;
+                var el=this.elements.click;
+                if(!el)return;
+                el.volume=this.vol*0.3;
+                el.currentTime=0;
+                el.play().catch(function(){});
             }
         };
 
-        // ===================== DATA =====================
-        const baseScenes = {
-            trilha: {
-                text: `A trilha se divide. Luz de vaga-lumes à esquerda, escuridão à direita.
+        /* ===================== SCENES ===================== */
+        var baseScenes={
+            trilha:{text:`A trilha se divide. Luz de vaga-lumes à <em>esquerda</em>, escuridão à <em>direita</em>.
 
-Digite 'luz' para seguir a luz ou 'escuro' para as sombras.`,
-                options: { luz: "lobo", escuro: "cogumelos" }, allowRoll: false, risk: 0
-            },
-            lobo: {
-                text: `Um lobo cinzento bloqueia o caminho! Ele rosna ferozmente.
+Digite <strong>"luz"</strong> para seguir a luz ou <strong>"escuro"</strong> para as sombras.`,opts:{luz:"lobo",escuro:"cogumelos"},roll:false,risk:0},
+            lobo:{text:`Um <strong>lobo cinzento</strong> bloqueia o caminho! Ele rosna ferozmente, olhos brilhando na penumbra.
 
-Digite 'lutar' para enfrentá-lo ou 'fugir' para correr.`,
-                options: { lutar: "cabana", fugir: "gameover_lobo" }, allowRoll: false, risk: 0.1
-            },
-            cogumelos: {
-                text: `Cogumelos brilhantes exalam aroma adocicado.
+Digite <strong>"lutar"</strong> para enfrentá-lo ou <strong>"fugir"</strong> para correr.`,opts:{lutar:"cabana",fugir:"gameover_lobo"},roll:false,risk:0.1},
+            cogumelos:{text:`<strong>Cogumelos brilhantes</strong> exalam um aroma adocicado quase hipnótico. Suas cores parecem pulsar lentamente.
 
-Digite 'comer' para experimentar ou 'ignorar' para seguir.`,
-                options: { comer: "gameover_cogumelo", ignorar: "ponte" }, allowRoll: false, risk: 0.2
-            },
-            cabana: {
-                text: `Uma cabana antiga com luz bruxuleante. Porta entreaberta.
+Digite <strong>"comer"</strong> para experimentar ou <strong>"ignorar"</strong> para seguir.`,opts:{comer:"gameover_cogumelo",ignorar:"ponte"},roll:false,risk:0.2},
+            cabana:{text:`Uma <strong>cabana antiga</strong> com luz bruxuleante. A porta está entreaberta, rangendo ao vento.
 
-Digite 'entrar' para investigar ou 'passar' para ignorar.`,
-                options: { entrar: "interior_cabana", passar: "ponte" }, allowRoll: false, risk: 0.05
-            },
-            interior_cabana: {
-                text: `Um velho sábio joga dados sobre a mesa.
-'Teste sua sorte, aventureiro.'
+Digite <strong>"entrar"</strong> para investigar ou <strong>"passar"</strong> para ignorar.`,opts:{entrar:"interior_cabana",passar:"ponte"},roll:false,risk:0.05},
+            interior_cabana:{text:`Um <strong>velho sábio</strong> joga dados sobre uma mesa de carvalho rachada.
 
-Digite 'rolar' para lançar os dados!`,
-                options: {}, allowRoll: true, rollMinSuccess: 12, rollSuccessScene: "sabio_ajuda", rollFailScene: "sabio_trapaca", risk: 0
-            },
-            sabio_ajuda: {
-                text: "", options: { beber: "ponte_segura" }, allowRoll: false, risk: 0,
-                dynamicText(result) {
-                    return `Você tirou ${result} no dado! O sábio lhe entrega uma poção azul.
-"Beba, isso lhe dará forças."
+— Teste sua sorte, aventureiro. — murmura ele, sem olhar para você.
 
-Digite 'beber' para tomar a poção.`;
-                }
-            },
-            sabio_trapaca: {
-                text: "", options: { seguir: "gameover_trapaca" }, allowRoll: false, risk: 0,
-                dynamicText(result) {
-                    return `Você tirou ${result}. O sábio ri e desaparece. Névoa densa o envolve.
-Digite 'seguir' para tentar sair.`;
-                }
-            },
-            ponte: {
-                text: `Ponte de corda sobre abismo. Tábuas apodrecidas balançam.
+Digite <strong>"rolar"</strong> para lançar os dados!`,opts:{},roll:true,need:12,ok:"sabio_ajuda",fail:"sabio_trapaca",risk:0},
+            sabio_ajuda:{text:"",opts:{beber:"ponte_segura"},roll:false,risk:0,
+                fmt:function(r){return `Você tirou <strong>${r}</strong> no dado! O sábio sorri e lhe entrega uma <strong>poção azul</strong>.<br><br>— Beba. Isso lhe dará forças para a travessia.<br><br>Digite <strong>"beber"</strong> para tomar a poção.`;}},
+            sabio_trapaca:{text:"",opts:{seguir:"gameover_trapaca"},roll:false,risk:0,
+                fmt:function(r){return `Você tirou <strong>${r}</strong>. O sábio ri — uma risada seca, desprovida de alegria — e <em>desaparece</em>. Névoa densa o envolve, sufocando a luz.<br><br>Digite <strong>"seguir"</strong> para tentar sair.`;}},
+            ponte:{text:`Uma <strong>ponte de corda</strong> estende-se sobre um abismo sem fim. Tábuas apodrecidas balançam ao vento cortante.
 
-Digite 'atravessar' para cruzar ou 'desistir' para voltar.`,
-                options: { atravessar: "saida", desistir: "gameover_ponte" }, allowRoll: false, risk: 0.3
-            },
-            ponte_segura: {
-                text: `Graças à poção, você se sente confiante. A ponte parece firme.
+Digite <strong>"atravessar"</strong> para cruzar ou <strong>"desistir"</strong> para voltar.`,opts:{atravessar:"saida",desistir:"gameover_ponte"},roll:false,risk:0.3},
+            ponte_segura:{text:`Graças à <strong>poção do sábio</strong>, suas mãos deixam de tremer. A ponte ainda balança, mas você sente firmeza nos pés.
 
-Digite 'atravessar' para cruzar.`,
-                options: { atravessar: "saida" }, allowRoll: false, risk: 0
-            },
-            saida: {
-                text: `A saída da floresta! A luz do sol brilha através das árvores.
+Digite <strong>"atravessar"</strong> para cruzar com confiança.`,opts:{atravessar:"saida"},roll:false,risk:0},
+            saida:{text:`A <strong>saída da floresta</strong>! Raios dourados de sol filtram-se através das copas das árvores, banhando o musgo em luz.
 
-Digite 'sair' para escapar.`,
-                options: { sair: "vitoria" }, allowRoll: false, risk: 0.1
-            },
-            vitoria: {
-                text: `✨ Você escapou da Floresta Sombria! ✨
-O reino está salvo. Você é um herói!`,
-                options: {}, allowRoll: false, risk: 0, isEnding: true
-            },
-            gameover_lobo: {
-                text: `O lobo é mais rápido. Ele o derruba e...
-💀 Você morreu. 💀`,
-                options: {}, allowRoll: false, risk: 0, isGameOver: true
-            },
-            gameover_cogumelo: {
-                text: `Veneno mortal corre em suas veias.
-💀 Você morreu. 💀`,
-                options: {}, allowRoll: false, risk: 0, isGameOver: true
-            },
-            gameover_trapaca: {
-                text: `Você cambaleia na névoa e cai num poço.
-💀 Você morreu. 💀`,
-                options: {}, allowRoll: false, risk: 0, isGameOver: true
-            },
-            gameover_ponte: {
-                text: `Uma rajada de vento te derruba no abismo.
-💀 Você morreu. 💀`,
-                options: {}, allowRoll: false, risk: 0, isGameOver: true
-            },
-            gameover_generico: {
-                text: `Ação inválida! A floresta pune os indecisos. Você cai num buraco escuro.
-💀 Você morreu. 💀`,
-                options: {}, allowRoll: false, risk: 0, isGameOver: true
-            },
-            gameover_azar: {
-                text: `O destino foi cruel. Uma armadilha oculta se ativa.
-💀 Você morreu. 💀`,
-                options: {}, allowRoll: false, risk: 0, isGameOver: true
-            }
+Digite <strong>"sair"</strong> para escapar.`,opts:{sair:"vitoria"},roll:false,risk:0.1},
+            vitoria:{text:`✨ <strong>Você escapou da Floresta Sombria!</strong> ✨<br><br>O reino está salvo. Canções serão compostas sobre sua jornada esta noite, ao redor das fogueiras.`,opts:{},roll:false,risk:0,end:true},
+            gameover_lobo:{text:`O lobo é mais rápido do que sua percepção. Ele salta, mandíbulas se fechando com força mortal...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_cogumelo:{text:`O doce sabor dá lugar a um frio paralisante. Suas pernas cedem enquanto o veneno percorre suas veias...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_trapaca:{text:`Você cambaleia na névoa, tentando encontrar o caminho. O chão cede. Queda. Escuridão.<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_ponte:{text:`Uma rajada de vento uiva entre as cordas. Você perde o equilíbrio, braços girando no vazio...<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_generico:{text:`A floresta não tolera indecisão. O chão se abre sob seus pés, raízes puxando-o para as profundezas.<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true},
+            gameover_azar:{text:`O destino foi cruel. Uma <strong>armadilha oculta</strong> se ativa sob seus pés — estacas envenenadas brotam do solo.<br><br><strong style='color:#c0392b'>💀 Você morreu. 💀</strong>`,opts:{},roll:false,risk:0,over:true}
         };
 
-        // ===================== STATE =====================
-        let scenes = {};
-        let currentSceneId = "";
-        let gameActive = false;
-        let difficulty = "heroi";
-        let typewriterTimer = null;
+        /* ===================== STATE ===================== */
+        var scenes={}, cur="", active=false, diff="heroi", twTimer=null;
 
-        // ===================== DOM =====================
-        const screens = {
-            menu: document.getElementById("screen-menu"),
-            opcoes: document.getElementById("screen-opcoes"),
-            sobre: document.getElementById("screen-sobre"),
-            dificuldade: document.getElementById("screen-dificuldade"),
-            contexto: document.getElementById("screen-contexto"),
-            jogo: document.getElementById("screen-jogo")
-        };
-        const storyEl = document.getElementById("story");
-        const commandInput = document.getElementById("command");
-        const submitBtn = document.getElementById("submit-btn");
-        const rollBtn = document.getElementById("roll-btn");
-        const feedbackEl = document.getElementById("feedback");
-        const restartBtn = document.getElementById("restart-btn");
-        const audioStatus = document.getElementById("audio-status");
-        const btnAudio = document.getElementById("btn-audio");
-        const volumeSlider = document.getElementById("volume-slider");
-        const volumeValue = document.getElementById("volume-value");
-        const contextoTexto = document.getElementById("contexto-texto");
+        /* ===================== DOM ===================== */
+        var $=function(id){return document.getElementById(id);};
+        var sc={ menu:$("sc-menu"), opts:$("sc-opts"), about:$("sc-about"), diff:$("sc-diff"), ctx:$("sc-ctx"), game:$("sc-game") };
+        var story=$("story"), storyBox=$("story-box"), cmd=$("cmd"), send=$("send-btn");
+        var dice=$("dice-btn"), feed=$("feedback"), restart=$("restart-btn");
+        var audioLabel=$("audio-label"), bAudio=$("b-audio"), volSlider=$("vol-slider"), volVal=$("vol-val");
+        var ctxText=$("ctx-text");
 
-        // ===================== UTILS =====================
-        function normalize(str) { return str.trim().toLowerCase(); }
-
-        function setFeedback(text, type="error") {
-            feedbackEl.textContent = text;
-            feedbackEl.style.color = type === "success" ? "#8e8" : (type === "info" ? "#aa8" : "#e66");
-            feedbackEl.classList.add("show");
-            clearTimeout(setFeedback._t);
-            setFeedback._t = setTimeout(() => feedbackEl.classList.remove("show"), 2500);
+        /* ===================== HELPERS ===================== */
+        function norm(s){return (s||"").trim().toLowerCase();}
+        function setFeed(txt,cls){
+            feed.textContent=txt||""; feed.className=cls?"on "+cls:"on err";
+            clearTimeout(setFeed._t);
+            if(txt)setFeed._t=setTimeout(function(){feed.classList.remove("on");},2800);
         }
 
-        // Typewriter effect with cursor
-        function typeText(element, text, speed = 18, onDone = null) {
-            element.classList.remove("show");
-            element.innerHTML = "";
-            clearTimeout(typewriterTimer);
-            let i = 0;
-            const clean = text.replace(/\n/g, "<br>");
-            // We insert HTML progressively. For simplicity with <br>, we split by tags.
-            const parts = clean.split(/(<br>)/g);
-            let partIndex = 0;
-            let charIndex = 0;
-            let currentHTML = "";
-            element.classList.add("cursor");
-
-            function step() {
-                if (partIndex >= parts.length) {
-                    element.classList.remove("cursor");
-                    if (onDone) onDone();
+        function typeWrite(el,txt,spd,cb){
+            clearTimeout(twTimer);
+            AudioEngine._clickAllowed = true;
+            storyBox.classList.remove("on");
+            el.innerHTML="";
+            el.classList.add("cursor");
+            var i=0, len=txt.length;
+            function step(){
+                if(i>=len){
+                    el.classList.remove("cursor");
+                    AudioEngine._clickAllowed = false;
+                    if(cb)cb();
                     return;
                 }
-                const part = parts[partIndex];
-                if (part === "<br>") {
-                    currentHTML += "<br>";
-                    element.innerHTML = currentHTML;
-                    partIndex++;
-                    charIndex = 0;
-                    typewriterTimer = setTimeout(step, speed * 2);
-                } else {
-                    if (charIndex < part.length) {
-                        currentHTML += part[charIndex];
-                        element.innerHTML = currentHTML;
-                        charIndex++;
-                        if (charIndex % 3 === 0) AudioEngine.sfxType();
-                        typewriterTimer = setTimeout(step, speed + Math.random() * 10);
-                    } else {
-                        partIndex++;
-                        charIndex = 0;
-                        typewriterTimer = setTimeout(step, speed);
-                    }
+                var ch=txt.charAt(i);
+                if(ch==="\n"){
+                    el.innerHTML+="<br>";
+                }else if(ch==="<"){
+                    var end=txt.indexOf(">",i);
+                    if(end===-1)end=i;
+                    el.innerHTML+=txt.substring(i,end+1);
+                    i=end;
+                }else{
+                    el.innerHTML+=ch;
+                    if(i%4===0)AudioEngine.sfxClick();
                 }
+                i++;
+                twTimer=setTimeout(step,spd+Math.random()*8);
             }
-            // Small delay to allow CSS transition to prepare
-            setTimeout(() => {
-                element.classList.add("show");
-                step();
-            }, 60);
+            setTimeout(function(){storyBox.classList.add("on");step();},50);
         }
 
-        // ===================== SCREEN MANAGER =====================
-        function showScreen(name) {
-            // Fade out current
-            Object.values(screens).forEach(s => s.classList.remove("active"));
-            // Small delay to allow fade-out, then fade in target
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    screens[name].classList.add("active");
-                });
-            });
-
-            // Audio context must resume on user gesture; ensure here
-            AudioEngine.ensure();
-
-            if (name === "jogo") {
-                // game music handled by startGame flow
-            } else if (name === "menu" || name === "opcoes" || name === "sobre" || name === "dificuldade") {
-                AudioEngine.playMenu();
+        /* ===================== SCREEN MGR ===================== */
+        function goScreen(name){
+            clearTimeout(twTimer);
+            AudioEngine._clickAllowed = false;
+            for(var k in sc) sc[k].classList.remove("on");
+            var t=sc[name]; if(t) t.classList.add("on");
+            if(name==="menu"||name==="opts"||name==="about"||name==="diff"){
+                AudioEngine.playMenu(false);
             }
         }
 
-        // ===================== GAME LOGIC =====================
-        function buildScenes(dif) {
-            scenes = JSON.parse(JSON.stringify(baseScenes)); // deep clone
-            // dynamicText functions are lost in JSON; restore references
-            scenes.sabio_ajuda.dynamicText = baseScenes.sabio_ajuda.dynamicText;
-            scenes.sabio_trapaca.dynamicText = baseScenes.sabio_trapaca.dynamicText;
-
-            const texts = {
-                heroi: {
-                    contexto: `Você é o Herói Lendário, campeão do reino. A Floresta Sombria é apenas mais um desafio em sua jornada épica. Com coragem inabalável, você parte para mais uma vitória.`,
-                    entrada: `Como herói aclamado, você marcha para a entrada da floresta. Árvores retorcidas bloqueiam a luz. O vento sussurra avisos, mas sua determinação é inabalável.
-
-Digite 'entrar' para adentrar a floresta.`
-                },
-                cavaleiro: {
-                    contexto: `Você é Sir Cedric, um nobre cavaleiro em busca de glória. A Floresta Sombria esconde perigos, mas sua espada e honra o guiarão.`,
-                    entrada: `Com armadura reluzente, você avança para a entrada da floresta. As árvores parecem sussurrar segredos antigos.
-
-Digite 'entrar' para adentrar a floresta.`
-                },
-                aventureiro: {
-                    contexto: `Você é um aventureiro destemido, movido pela curiosidade e pela promessa de tesouros ocultos. A Floresta Sombria é traiçoeira, mas você confia em seus instintos.`,
-                    entrada: `Você está na entrada da Floresta Sombria. Árvores retorcidas bloqueiam a luz do sol. O vento sussurra avisos.
-
-Digite 'entrar' para adentrar a floresta.`
-                }
+        /* ===================== GAME ===================== */
+        function buildScenes(dif){
+            scenes={};
+            for(var k in baseScenes) scenes[k]=baseScenes[k];
+            var ctxs={
+                heroi:`Você é o <strong>Herói Lendário</strong>, campeão do reino. A Floresta Sombria é apenas mais um desafio em sua jornada épica. Com coragem inabalável, você parte para mais uma vitória.`,
+                knight:`Você é <strong>Sir Cedric</strong>, um nobre cavaleiro em busca de glória. A Floresta Sombria esconde perigos, mas sua espada e honra o guiarão.`,
+                ranger:`Você é um <strong>aventureiro destemido</strong>, movido pela curiosidade e pela promessa de tesouros ocultos. A Floresta Sombria é traiçoeira, mas você confia em seus instintos.`
             };
-            const t = texts[dif];
-            scenes.entrada = {
-                text: t.entrada,
-                options: { entrar: "trilha" },
-                allowRoll: false, risk: 0
+            var ents={
+                heroi:`Como herói aclamado, você marcha para a <strong>entrada da floresta</strong>. Árvores retorcidas bloqueiam a luz. O vento sussurra avisos, mas sua determinação é inabalável.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`,
+                knight:`Com armadura reluzente, você avança para a <strong>entrada da floresta</strong>. As árvores parecem sussurrar segredos antigos.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`,
+                ranger:`Você está na <strong>entrada da Floresta Sombria</strong>. Árvores retorcidas bloqueiam a luz do sol. O vento sussurra avisos.<br><br>Digite <strong>"entrar"</strong> para adentrar a floresta.`
             };
-            return t.contexto;
+            scenes.entrada={text:ents[dif],opts:{entrar:"trilha"},roll:false,risk:0};
+            return ctxs[dif];
         }
 
-        function startGame(dif) {
-            difficulty = dif;
-            const contextStory = buildScenes(dif);
-            contextoTexto.textContent = contextStory;
-            showScreen("contexto");
-
-            // After 4.5s, fade to game
-            setTimeout(() => {
-                showScreen("jogo");
-                gameActive = true;
-                enableInputs(true);
-                restartBtn.style.display = "none";
-                storyEl.classList.remove("gameover-text", "victory-text");
-                AudioEngine.playGame();
-                transitionTo("entrada");
-            }, 4500);
+        function startGame(dif){
+            diff=dif; var ctxStory=buildScenes(dif);
+            ctxText.innerHTML=ctxStory; goScreen("ctx");
+            setTimeout(function(){
+                goScreen("game"); active=true; setInputs(true);
+                restart.style.display="none"; storyBox.classList.remove("danger","gold");
+                AudioEngine.playGame(); goto("entrada");
+            },4200);
         }
 
-        function transitionTo(sceneId, extraData = null) {
-            if (!gameActive && sceneId !== "entrada") return;
-            const scene = scenes[sceneId];
-            if (!scene) return;
+        function setInputs(on){
+            cmd.disabled=!on; send.disabled=!on; dice.disabled=!on;
+            if(on) setTimeout(function(){cmd.focus();},60);
+        }
 
-            let text = scene.text;
-            if (scene.dynamicText && extraData !== null) {
-                text = scene.dynamicText(extraData);
-            }
-
-            currentSceneId = sceneId;
-            rollBtn.classList.toggle("visible", !!(scene.allowRoll && gameActive));
-
-            // Ending handling
-            if (scene.isEnding || scene.isGameOver) {
-                gameActive = false;
-                enableInputs(false);
-                restartBtn.style.display = "block";
-                if (scene.isGameOver) {
-                    storyEl.classList.add("gameover-text");
-                    AudioEngine.playGameOver();
-                } else if (sceneId === "vitoria") {
-                    storyEl.classList.add("victory-text");
-                    AudioEngine.playVictory();
-                }
-                // Instant display for endings (no typewriter) for dramatic impact
-                storyEl.classList.remove("cursor");
-                storyEl.innerHTML = text.replace(/\n/g, "<br>");
-                storyEl.classList.add("show");
-            } else {
-                enableInputs(true);
-                restartBtn.style.display = "none";
-                storyEl.classList.remove("gameover-text", "victory-text");
-                typeText(storyEl, text, 16, () => {
-                    commandInput.focus();
-                });
+        function goto(id,extra){
+            if(!active&&id!=="entrada")return;
+            var scn=scenes[id]; if(!scn)return;
+            cur=id; var txt=scn.text;
+            if(scn.fmt&&extra!=null) txt=scn.fmt(extra);
+            dice.classList.toggle("on",!!(scn.roll&&active));
+            if(scn.end||scn.over){
+                active=false; setInputs(false); restart.style.display="block";
+                storyBox.classList.remove("on"); story.innerHTML=txt;
+                storyBox.classList.add(scn.over?"danger":"gold");
+                setTimeout(function(){storyBox.classList.add("on");},40);
+                if(scn.over) AudioEngine.playOver(); else AudioEngine.playWin();
+            }else{
+                setInputs(true); restart.style.display="none";
+                storyBox.classList.remove("danger","gold");
+                typeWrite(story,txt,15,function(){cmd.focus();});
             }
         }
 
-        function enableInputs(on) {
-            commandInput.disabled = !on;
-            submitBtn.disabled = !on;
-            rollBtn.disabled = !on;
-            if (on) setTimeout(() => commandInput.focus(), 50);
+        function checkRisk(scn){
+            if(!scn.risk||scn.risk<=0)return null;
+            var ch=scn.risk;
+            if(diff==="knight"){}
+            else if(diff==="ranger")ch*=2.5;
+            else ch=0;
+            return (ch>0&&Math.random()<ch)?"gameover_azar":null;
         }
 
-        function applyRisk(scene) {
-            if (!scene.risk || scene.risk <= 0) return null;
-            let chance = scene.risk;
-            if (difficulty === "cavaleiro") {
-                // padrão
-            } else if (difficulty === "aventureiro") {
-                chance *= 2.5;
-            } else {
-                chance = 0;
-            }
-            if (chance > 0 && Math.random() < chance) {
-                return "gameover_azar";
-            }
-            return null;
-        }
-
-        function processInput() {
-            if (!gameActive) return;
-            const raw = commandInput.value;
-            const input = normalize(raw);
-            commandInput.value = "";
-            if (!input) return;
-
-            const scene = scenes[currentSceneId];
-            if (input === "rolar") {
-                if (scene.allowRoll) {
-                    rollDice();
-                } else {
-                    setFeedback("⚠️ Não há nada para rolar aqui.", "info");
-                }
+        function processCmd(){
+            if(!active)return;
+            var raw=cmd.value; cmd.value="";
+            var inp=norm(raw); if(!inp)return;
+            var scn=scenes[cur];
+            if(inp==="rolar"){
+                if(scn.roll){doRoll();} else setFeed("⚠ Não há nada para rolar aqui.","info");
                 return;
             }
-
-            if (!scene.options || !scene.options.hasOwnProperty(input)) {
-                transitionTo("gameover_generico");
-                return;
-            }
-
-            const riskResult = applyRisk(scene);
-            if (riskResult) {
-                transitionTo(riskResult);
-                return;
-            }
-
-            transitionTo(scene.options[input]);
+            if(!scn.opts||!scn.opts.hasOwnProperty(inp)){ goto("gameover_generico"); return; }
+            var risk=checkRisk(scn); if(risk){goto(risk);return;}
+            goto(scn.opts[inp]);
         }
 
-        function rollDice() {
-            if (!gameActive) return;
-            const scene = scenes[currentSceneId];
-            if (!scene.allowRoll) {
-                setFeedback("⚠️ Você não pode rolar dados agora.", "info");
-                return;
-            }
+        function doRoll(){
+            if(!active)return;
+            var scn=scenes[cur];
+            if(!scn.roll){setFeed("⚠ Você não pode rolar dados agora.","info");return;}
             AudioEngine.sfxDice();
-            const roll = Math.floor(Math.random() * 20) + 1;
-            const success = roll >= scene.rollMinSuccess;
-            const nextScene = success ? scene.rollSuccessScene : scene.rollFailScene;
-            setFeedback(`🎲 Você rolou ${roll}. ${success ? "Sucesso!" : "Fracasso..."}`, success ? "success" : "error");
-            transitionTo(nextScene, roll);
+            var r=Math.floor(Math.random()*20)+1;
+            var ok=r>=scn.need; var nxt=ok?scn.ok:scn.fail;
+            setFeed("🎲 Você rolou "+r+". "+(ok?"Sucesso!":"Fracasso..."),ok?"ok":"err");
+            goto(nxt,r);
         }
 
-        function restartGame() {
-            gameActive = false;
-            clearTimeout(typewriterTimer);
-            enableInputs(false);
-            restartBtn.style.display = "none";
-            storyEl.classList.remove("show", "gameover-text", "victory-text");
-            storyEl.innerHTML = "";
-            showScreen("dificuldade");
-            AudioEngine.playMenu();
+        function doRestart(){
+            active=false; clearTimeout(twTimer); setInputs(false);
+            AudioEngine._clickAllowed = false;
+            restart.style.display="none"; storyBox.classList.remove("on","danger","gold");
+            story.innerHTML=""; goScreen("diff");
+            AudioEngine.playMenu(true);
         }
 
-        // ===================== EVENTS =====================
-        document.getElementById("btn-iniciar").addEventListener("click", () => showScreen("dificuldade"));
-        document.getElementById("btn-opcoes").addEventListener("click", () => showScreen("opcoes"));
-        document.getElementById("btn-sobre").addEventListener("click", () => showScreen("sobre"));
-        document.getElementById("btn-voltar-opcoes").addEventListener("click", () => showScreen("menu"));
-        document.getElementById("btn-voltar-sobre").addEventListener("click", () => showScreen("menu"));
-        document.getElementById("btn-voltar-dificuldade").addEventListener("click", () => showScreen("menu"));
+        /* ===================== EVENTS ===================== */
+        $("b-start").addEventListener("click",function(){goScreen("diff");});
+        $("b-opts").addEventListener("click",function(){goScreen("opts");});
+        $("b-about").addEventListener("click",function(){goScreen("about");});
+        $("b-back-opts").addEventListener("click",function(){goScreen("menu");});
+        $("b-back-about").addEventListener("click",function(){goScreen("menu");});
+        $("b-back-diff").addEventListener("click",function(){goScreen("menu");});
+        $("b-hero").addEventListener("click",function(){startGame("heroi");});
+        $("b-knight").addEventListener("click",function(){startGame("knight");});
+        $("b-ranger").addEventListener("click",function(){startGame("ranger");});
 
-        document.getElementById("btn-heroi").addEventListener("click", () => startGame("heroi"));
-        document.getElementById("btn-cavaleiro").addEventListener("click", () => startGame("cavaleiro"));
-        document.getElementById("btn-aventureiro").addEventListener("click", () => startGame("aventureiro"));
-
-        btnAudio.addEventListener("click", () => {
-            AudioEngine.enabled = !AudioEngine.enabled;
-            audioStatus.textContent = "Áudio: " + (AudioEngine.enabled ? "Ligado" : "Desligado");
-            btnAudio.textContent = AudioEngine.enabled ? "Desligar Áudio" : "Ligar Áudio";
-            if (AudioEngine.enabled) {
-                AudioEngine.ensure();
-                // Determine which screen is active to pick correct music
-                if (screens.jogo.classList.contains("active") && gameActive) AudioEngine.playGame();
-                else if (screens.contexto.classList.contains("active")) AudioEngine.playMenu();
-                else AudioEngine.playMenu();
-            } else {
-                AudioEngine.stopCurrent();
-            }
+        bAudio.addEventListener("click",function(){
+            AudioEngine.enabled=!AudioEngine.enabled;
+            audioLabel.textContent="🎵 Áudio: "+(AudioEngine.enabled?"Ligado":"Desligado");
+            bAudio.textContent=AudioEngine.enabled?"🔇 Desligar Áudio":"🔊 Ligar Áudio";
+            if(AudioEngine.enabled){
+                if(sc.game.classList.contains("on")&&active) AudioEngine.playGame();
+                else AudioEngine.playMenu(false);
+            }else AudioEngine._stop();
+            try{localStorage.setItem("fs_audio",AudioEngine.enabled?"1":"0");}catch(e){}
         });
-
-        volumeSlider.addEventListener("input", function() {
-            const v = parseInt(this.value, 10);
-            volumeValue.textContent = v + "%";
-            AudioEngine.setVolume(v / 100);
+        volSlider.addEventListener("input",function(){
+            var v=parseInt(this.value,10); volVal.textContent=v+"%";
+            AudioEngine.setVolume(v/100);
         });
-
-        submitBtn.addEventListener("click", processInput);
-        rollBtn.addEventListener("click", rollDice);
-        restartBtn.addEventListener("click", restartGame);
-        commandInput.addEventListener("keydown", e => {
-            if (e.key === "Enter") { e.preventDefault(); processInput(); }
+        volSlider.addEventListener("change",function(){
+            try{localStorage.setItem("fs_volume",this.value);}catch(e){}
         });
+        send.addEventListener("click",processCmd);
+        dice.addEventListener("click",doRoll);
+        restart.addEventListener("click",doRestart);
+        cmd.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();processCmd();}});
 
-        // Prevent focus loss when clicking inside game container
-        document.getElementById("game-container").addEventListener("click", e => {
-            if (gameActive && e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
-                commandInput.focus();
-            }
-        });
-
-        // ===================== INIT =====================
-        // Load saved volume if any
-        try {
-            const savedVol = localStorage.getItem("fs_volume");
-            if (savedVol !== null) {
-                const v = parseInt(savedVol, 10);
-                volumeSlider.value = v;
-                volumeValue.textContent = v + "%";
-                AudioEngine.setVolume(v / 100);
-            }
-            const savedAudio = localStorage.getItem("fs_audio");
-            if (savedAudio !== null) {
-                AudioEngine.enabled = savedAudio === "1";
-                audioStatus.textContent = "Áudio: " + (AudioEngine.enabled ? "Ligado" : "Desligado");
-                btnAudio.textContent = AudioEngine.enabled ? "Desligar Áudio" : "Ligar Áudio";
-            }
-        } catch(e) {}
-
-        // Save preferences on change
-        function savePrefs() {
-            try {
-                localStorage.setItem("fs_volume", volumeSlider.value);
-                localStorage.setItem("fs_audio", AudioEngine.enabled ? "1" : "0");
-            } catch(e) {}
-        }
-        volumeSlider.addEventListener("change", savePrefs);
-        btnAudio.addEventListener("click", savePrefs);
-
-        // Start
-        showScreen("menu");
+        /* ===================== INIT ===================== */
+        try{
+            var sv=localStorage.getItem("fs_volume");
+            if(sv!==null){var v=parseInt(sv,10);volSlider.value=v;volVal.textContent=v+"%";AudioEngine.setVolume(v/100);}
+            var sa=localStorage.getItem("fs_audio");
+            if(sa!==null){AudioEngine.enabled=sa==="1";audioLabel.textContent="🎵 Áudio: "+(AudioEngine.enabled?"Ligado":"Desligado");bAudio.textContent=AudioEngine.enabled?"🔇 Desligar Áudio":"🔊 Ligar Áudio";}
+        }catch(e){}
+        AudioEngine.playMenu(true);
+        goScreen("menu");
     })();
     </script>
 </body>
